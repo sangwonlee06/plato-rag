@@ -41,6 +41,10 @@ warn_return_any = true
 warn_unused_configs = true
 plugins = ["pydantic.mypy"]
 
+[[tool.mypy.overrides]]
+module = "pgvector.*"
+ignore_missing_imports = true
+
 [tool.ruff]
 target-version = "py312"
 line-length = 100

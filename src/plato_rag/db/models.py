@@ -33,7 +33,7 @@ class DocumentModel(Base):
     # Philosophy metadata
     tradition: Mapped[str | None] = mapped_column(String(100))
     period: Mapped[str | None] = mapped_column(String(100))
-    topics: Mapped[list | None] = mapped_column(JSON)
+    topics: Mapped[list[str] | None] = mapped_column(JSON)
 
     # Source-specific
     translation: Mapped[str | None] = mapped_column(String(300))
@@ -60,7 +60,7 @@ class ChunkModel(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     document_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
     text: Mapped[str] = mapped_column(Text, nullable=False)
-    embedding: Mapped[list | None] = mapped_column(Vector(3072))
+    embedding: Mapped[list[float] | None] = mapped_column(Vector(3072))
 
     # Source classification (denormalized)
     source_class: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
@@ -81,7 +81,7 @@ class ChunkModel(Base):
     context_type: Mapped[str | None] = mapped_column(String(50))
 
     # Flexible metadata
-    extra_metadata: Mapped[dict | None] = mapped_column(JSON)
+    extra_metadata: Mapped[dict[str, object] | None] = mapped_column(JSON)
 
     # Chunking metadata
     chunk_index: Mapped[int] = mapped_column(Integer, default=0)

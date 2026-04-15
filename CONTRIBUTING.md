@@ -37,7 +37,19 @@ alembic upgrade head
 pytest -v
 ```
 
-All tests should pass before submitting changes. Tests that require external API calls (OpenAI, Anthropic) or a running database are not yet in the suite — the current tests are all unit tests against domain models, policies, and contracts.
+All tests should pass before submitting changes. Tests that require external API calls (OpenAI, Anthropic) or a running database are not yet in the suite — the current tests are all unit tests against domain models, policies, and contracts. No API keys are needed to run the test suite.
+
+## CI
+
+Pull requests run three checks automatically via GitHub Actions:
+
+| Check | Command | What it enforces |
+|---|---|---|
+| Lint | `ruff check src/ tests/` | Style, imports, common bugs |
+| Type-check | `mypy src/` | Strict type correctness (no `Any` leaks) |
+| Test | `pytest tests/ -v` | All 36 unit tests pass |
+
+All three must pass for a PR to be mergeable. No external services or secrets are required to run CI.
 
 ## Code style
 

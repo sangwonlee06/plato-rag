@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -110,7 +112,11 @@ class ChunkRepository:
             speaker=model.speaker,
             interlocutor=model.interlocutor,
             context_type=model.context_type,
-            extra_metadata=model.extra_metadata,
+            extra_metadata=(
+                cast(dict[str, str], model.extra_metadata)
+                if model.extra_metadata
+                else None
+            ),
             chunk_index=model.chunk_index,
             token_count=model.token_count,
             overlap_tokens=model.overlap_tokens,
