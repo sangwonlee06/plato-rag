@@ -46,7 +46,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
 
 app = FastAPI(
     title="Plato RAG Service",
-    description="Philosophy RAG with source-priority retrieval. Early-stage — see README for status.",
+    description=(
+        "Philosophy RAG with source-priority retrieval. "
+        "Early-stage — see README for status."
+    ),
     version="0.1.0",
     lifespan=lifespan,
 )

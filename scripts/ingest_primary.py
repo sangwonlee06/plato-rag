@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Ingest a prepared primary text file into the Plato RAG corpus.
 
+Requires the package to be installed (pip install -e ".[dev]").
+
 Usage:
     python scripts/ingest_primary.py \
         --file data/prepared/meno.txt \
@@ -15,7 +17,6 @@ from __future__ import annotations
 import argparse
 import asyncio
 import logging
-import sys
 import uuid
 
 from plato_rag.config import Settings
@@ -87,5 +88,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    sys.path.insert(0, "src")
     asyncio.run(main())

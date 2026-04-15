@@ -17,10 +17,10 @@ the registry is the single source of truth.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class SourceClass(str, Enum):
+class SourceClass(StrEnum):
     """Classification of a source by its epistemic role."""
 
     PRIMARY_TEXT = "primary_text"

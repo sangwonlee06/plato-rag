@@ -13,4 +13,5 @@ venv/
 .ruff_cache/
 *.sqlite
 data/raw/
-data/prepared/
+data/prepared/*
+!data/prepared/.gitkeep

@@ -7,9 +7,8 @@ from dataclasses import dataclass
 
 from plato_rag.domain.chunk import ScoredChunk
 from plato_rag.generation.citation_extractor import BasicCitationExtractor
-from plato_rag.generation.llm.anthropic import AnthropicLLM
 from plato_rag.generation.prompts.philosophy import build_query_messages
-from plato_rag.protocols.generation import ExtractedCitation
+from plato_rag.protocols.generation import LLM, CitationExtractor, ExtractedCitation
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +21,13 @@ class GenerationResult:
 
 
 class GenerationService:
-    def __init__(self, llm: AnthropicLLM) -> None:
+    def __init__(
+        self,
+        llm: LLM,
+        extractor: CitationExtractor | None = None,
+    ) -> None:
         self._llm = llm
-        self._extractor = BasicCitationExtractor()
+        self._extractor: CitationExtractor = extractor or BasicCitationExtractor()
 
     async def generate(
         self,

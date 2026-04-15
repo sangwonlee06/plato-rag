@@ -1,7 +1,7 @@
 """Protocol interfaces for the Plato RAG service."""
 
 from plato_rag.protocols.embedding import Embedder
-from plato_rag.protocols.generation import CitationExtractor, ExtractedCitation, LLM, LLMMessage
+from plato_rag.protocols.generation import LLM, CitationExtractor, ExtractedCitation, LLMMessage
 from plato_rag.protocols.ingestion import (
     ChunkConfig,
     Chunker,

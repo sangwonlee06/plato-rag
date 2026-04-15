@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import uuid
-from collections.abc import Sequence
-
-from sqlalchemy import func, select, text
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from plato_rag.db.models import ChunkModel

@@ -11,7 +11,6 @@ import uuid
 from dataclasses import replace
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from plato_rag.api.contracts import (
     ChatMode,
@@ -29,6 +28,7 @@ from plato_rag.api.contracts import (
 )
 from plato_rag.config import Settings
 from plato_rag.dependencies import get_generation_service, get_retrieval_service, get_settings
+from plato_rag.domain.chunk import ScoredChunk
 from plato_rag.domain.source import SourceClass, trust_tier_for
 from plato_rag.generation.service import GenerationService
 from plato_rag.retrieval.policy import PLATO_RETRIEVAL_POLICY
@@ -45,7 +45,8 @@ async def query(
     generation_service: GenerationService = Depends(get_generation_service),
 ) -> QueryResponse:
     if request.mode != ChatMode.PLATO:
-        raise HTTPException(status_code=501, detail=f"Mode {request.mode.value} is not yet implemented.")
+        msg = f"Mode {request.mode.value} is not yet implemented."
+        raise HTTPException(status_code=501, detail=msg)
 
     request_id = f"req_{uuid.uuid4().hex[:12]}"
 
@@ -80,7 +81,11 @@ async def query(
             author=cit.author or "",
             location=cit.location,
             excerpt=cit.excerpt,
-            source_type=compat_source_type_for(cit.source_class) if cit.source_class else CompatSourceType.SECONDARY,
+            source_type=(
+                compat_source_type_for(cit.source_class)
+                if cit.source_class
+                else CompatSourceType.SECONDARY
+            ),
             source_class=cit.source_class or SourceClass.PEER_REVIEWED,
             trust_tier=tier,
             access_url=cit.access_url,
@@ -119,9 +124,9 @@ async def query(
     )
 
 
-def _chunk_to_response(sc: object) -> RetrievedChunkResponse:
+def _chunk_to_response(sc: ScoredChunk) -> RetrievedChunkResponse:
     """Map a ScoredChunk to the API response model."""
-    chunk = sc.chunk  # type: ignore[attr-defined]
+    chunk = sc.chunk
     tier = trust_tier_for(chunk.source_class)
 
     loc_ref = None

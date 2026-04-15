@@ -13,7 +13,8 @@ from plato_rag.db.repositories.chunk import ChunkRepository
 from plato_rag.db.repositories.document import DocumentRepository
 from plato_rag.domain.chunk import ChunkData
 from plato_rag.domain.document import DocumentMetadata
-from plato_rag.protocols.ingestion import ChunkConfig, Chunker, ParsedDocument, Parser
+from plato_rag.protocols.embedding import Embedder
+from plato_rag.protocols.ingestion import ChunkConfig, Chunker, Parser
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ class IngestionService:
         session: AsyncSession,
         parser: Parser,
         chunker: Chunker,
-        embedder: object,  # must have .embed(list[str]) and .model_name()
+        embedder: Embedder,
     ) -> None:
         self._session = session
         self._parser = parser

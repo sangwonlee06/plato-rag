@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel
 
@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-class CompatSourceType(str, Enum):
+class CompatSourceType(StrEnum):
     """NestJS-compatible source type (PRIMARY / SECONDARY).
 
     The NestJS app currently uses this simpler classification.
@@ -37,7 +37,7 @@ def compat_source_type_for(source_class: SourceClass) -> CompatSourceType:
     return CompatSourceType.SECONDARY
 
 
-class InterpretationLevel(str, Enum):
+class InterpretationLevel(StrEnum):
     """How directly the answer is grounded in retrieved sources."""
 
     DIRECT = "DIRECT"
@@ -45,14 +45,14 @@ class InterpretationLevel(str, Enum):
     LOW_CONFIDENCE = "LOW_CONFIDENCE"
 
 
-class ChatMode(str, Enum):
+class ChatMode(StrEnum):
     """Product modes. Only PLATO is implemented."""
 
     PLATO = "PLATO"
     FREGE = "FREGE"
 
 
-class ConversationRole(str, Enum):
+class ConversationRole(StrEnum):
     USER = "USER"
     ASSISTANT = "ASSISTANT"
 

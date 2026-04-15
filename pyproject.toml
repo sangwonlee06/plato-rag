@@ -49,6 +49,12 @@ src = ["src"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
+[tool.ruff.lint.per-file-ignores]
+"src/plato_rag/api/v1/*.py" = ["B008"]  # Depends() in FastAPI endpoint signatures
+"src/plato_rag/dependencies.py" = ["B008"]
+"src/plato_rag/generation/prompts/*.py" = ["E501"]  # Prompt text is prose, not code
+"src/plato_rag/ingestion/parsers/*.py" = ["E501"]  # Docstring examples
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"

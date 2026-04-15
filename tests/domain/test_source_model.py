@@ -1,8 +1,9 @@
 """Tests for the source trust model and LocationRef."""
 
+import pytest
+
 from plato_rag.domain.location import LocationRef, LocationSystem
 from plato_rag.domain.source import (
-    COLLECTION_REGISTRY,
     SOURCE_CLASS_REGISTRY,
     SourceClass,
     collection_source_class,
@@ -44,7 +45,6 @@ class TestCollectionRegistry:
         assert collection_source_class("platonic_dialogues") == SourceClass.PRIMARY_TEXT
 
     def test_unknown_collection_raises(self) -> None:
-        import pytest
         with pytest.raises(ValueError, match="Unknown collection"):
             collection_source_class("nonexistent")
 

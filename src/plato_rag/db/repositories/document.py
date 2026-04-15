@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -31,7 +31,7 @@ class DocumentRepository:
             edition=meta.edition,
             source_url=meta.source_url,
             last_verified_at=meta.last_verified_at,
-            ingested_at=datetime.now(timezone.utc),
+            ingested_at=datetime.now(UTC),
             parser_version=meta.parser_version,
             raw_hash=meta.raw_hash,
         )

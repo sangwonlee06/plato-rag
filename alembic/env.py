@@ -1,5 +1,6 @@
 """Alembic migration environment."""
 
+import os
 from logging.config import fileConfig
 
 from alembic import context
@@ -8,6 +9,13 @@ from sqlalchemy import engine_from_config, pool
 from plato_rag.db.models import Base
 
 config = context.config
+
+# Override sqlalchemy.url from environment if available.
+# This avoids hardcoding credentials in alembic.ini.
+env_url = os.environ.get("PLATO_RAG_DATABASE_URL_SYNC")
+if env_url:
+    config.set_main_option("sqlalchemy.url", env_url)
+
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 

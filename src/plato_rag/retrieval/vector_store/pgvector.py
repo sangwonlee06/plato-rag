@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from plato_rag.db.repositories.chunk import ChunkRepository
 from plato_rag.domain.chunk import ScoredChunk
-from plato_rag.domain.source import SourceClass
 from plato_rag.protocols.retrieval import SearchFilters
 
 

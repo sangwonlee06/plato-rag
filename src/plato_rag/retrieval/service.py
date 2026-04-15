@@ -16,12 +16,11 @@ from dataclasses import dataclass
 
 from plato_rag.api.contracts.common import InterpretationLevel
 from plato_rag.domain.chunk import ScoredChunk
-from plato_rag.domain.source import SourceClass, is_high_trust, trust_tier_for
-from plato_rag.ingestion.embedders.openai import OpenAIEmbedder
-from plato_rag.protocols.retrieval import SearchFilters
+from plato_rag.domain.source import SourceClass, is_high_trust
+from plato_rag.protocols.embedding import Embedder
+from plato_rag.protocols.retrieval import Reranker, SearchFilters, VectorStore
 from plato_rag.retrieval.policy import RetrievalPolicy
 from plato_rag.retrieval.reranker.source_priority import SourcePriorityReranker
-from plato_rag.retrieval.vector_store.pgvector import PgVectorStore
 
 logger = logging.getLogger(__name__)
 
@@ -45,13 +44,13 @@ class RetrievalResult:
 class RetrievalService:
     def __init__(
         self,
-        vector_store: PgVectorStore,
-        embedder: OpenAIEmbedder,
-        reranker: SourcePriorityReranker | None = None,
+        vector_store: VectorStore,
+        embedder: Embedder,
+        reranker: Reranker | None = None,
     ) -> None:
         self._store = vector_store
         self._embedder = embedder
-        self._reranker = reranker or SourcePriorityReranker()
+        self._reranker: Reranker = reranker or SourcePriorityReranker()
 
     async def retrieve(
         self,
@@ -145,7 +144,10 @@ class RetrievalService:
             level = InterpretationLevel.LOW_CONFIDENCE
             summary = "Insufficient source material retrieved."
             limitations = "The corpus may not cover this topic, or the question may not match well."
-        elif primary_count < rules.direct_min_primary or high_trust_count < rules.direct_min_high_trust:
+        elif (
+            primary_count < rules.direct_min_primary
+            or high_trust_count < rules.direct_min_high_trust
+        ):
             level = InterpretationLevel.INTERPRETIVE
             summary = "Answer relies on interpretation beyond direct primary source support."
             limitations = None

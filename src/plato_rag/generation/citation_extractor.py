@@ -50,7 +50,11 @@ class BasicCitationExtractor:
                     is_grounded=True,
                     source_class=match.source_class,
                     author=match.author,
-                    access_url=match.extra_metadata.get("entry_url") if match.extra_metadata else None,
+                    access_url=(
+                        match.extra_metadata.get("entry_url")
+                        if match.extra_metadata
+                        else None
+                    ),
                 ))
             else:
                 verified.append(ExtractedCitation(

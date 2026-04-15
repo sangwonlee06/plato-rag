@@ -19,10 +19,10 @@ Storing these as typed LocationRef rather than opaque strings enables:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class LocationSystem(str, Enum):
+class LocationSystem(StrEnum):
     """Reference system used for locating passages in a work."""
 
     STEPHANUS = "stephanus"
@@ -62,12 +62,10 @@ class LocationRef:
         since the system is clear from context (work title).
         """
         base = self.display()
-        if self.system == LocationSystem.SECTION:
-            if not base.startswith("\u00a7"):
-                return f"\u00a7{base}"
-        if self.system == LocationSystem.PAGE:
-            if not base.startswith("p."):
-                return f"p. {base}"
+        if self.system == LocationSystem.SECTION and not base.startswith("\u00a7"):
+            return f"\u00a7{base}"
+        if self.system == LocationSystem.PAGE and not base.startswith("p."):
+            return f"p. {base}"
         return base
 
     def matches_value(self, raw_value: str) -> bool:
@@ -83,10 +81,10 @@ class LocationRef:
             return True
         # Handle section prefix variations: "2.1" matches "Section 2.1" matches "§2.1"
         for prefix in ("section ", "\u00a7", "sec. ", "sec "):
-            if normalized_self.startswith(prefix):
-                if normalized_self[len(prefix):].strip() == normalized_other:
-                    return True
-            if normalized_other.startswith(prefix):
-                if normalized_self == normalized_other[len(prefix):].strip():
-                    return True
+            stripped_self = normalized_self[len(prefix):].strip()
+            stripped_other = normalized_other[len(prefix):].strip()
+            if normalized_self.startswith(prefix) and stripped_self == normalized_other:
+                return True
+            if normalized_other.startswith(prefix) and normalized_self == stripped_other:
+                return True
         return False

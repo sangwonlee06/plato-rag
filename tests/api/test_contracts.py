@@ -10,7 +10,6 @@ from plato_rag.api.contracts import (
     LocationRefResponse,
     QueryRequest,
     QueryResponse,
-    RetrievedChunkResponse,
     SourceClass,
     SourceCoverageResponse,
     compat_source_type_for,
@@ -22,7 +21,8 @@ class TestCompatSourceType:
         assert compat_source_type_for(SourceClass.PRIMARY_TEXT) == CompatSourceType.PRIMARY
 
     def test_reference_maps_to_secondary(self) -> None:
-        assert compat_source_type_for(SourceClass.REFERENCE_ENCYCLOPEDIA) == CompatSourceType.SECONDARY
+        result = compat_source_type_for(SourceClass.REFERENCE_ENCYCLOPEDIA)
+        assert result == CompatSourceType.SECONDARY
 
     def test_peer_reviewed_maps_to_secondary(self) -> None:
         assert compat_source_type_for(SourceClass.PEER_REVIEWED) == CompatSourceType.SECONDARY

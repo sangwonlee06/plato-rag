@@ -8,7 +8,12 @@ from plato_rag.protocols.generation import LLMMessage
 
 
 class AnthropicLLM:
-    def __init__(self, api_key: str, model: str = "claude-sonnet-4-20250514", max_tokens: int = 2048):
+    def __init__(
+        self,
+        api_key: str,
+        model: str = "claude-sonnet-4-20250514",
+        max_tokens: int = 2048,
+    ) -> None:
         self._client = AsyncAnthropic(api_key=api_key)
         self._model = model
         self._max_tokens = max_tokens

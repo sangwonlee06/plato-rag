@@ -17,7 +17,6 @@ from plato_rag.domain.chunk import ScoredChunk
 from plato_rag.domain.source import SourceClass
 from plato_rag.retrieval.policy import RetrievalPolicy
 
-
 # ---------------------------------------------------------------------------
 # Vector store types
 # ---------------------------------------------------------------------------

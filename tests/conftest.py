@@ -4,7 +4,7 @@ import uuid
 
 import pytest
 
-from plato_rag.domain.chunk import ChunkData, ScoredChunk
+from plato_rag.domain.chunk import ChunkData
 from plato_rag.domain.location import LocationRef, LocationSystem
 from plato_rag.domain.source import SourceClass
 

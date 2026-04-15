@@ -2,7 +2,7 @@
 
 from plato_rag.domain.chunk import ChunkData, ScoredChunk
 from plato_rag.domain.source import SourceClass
-from plato_rag.retrieval.policy import PLATO_RETRIEVAL_POLICY, RetrievalPolicy
+from plato_rag.retrieval.policy import PLATO_RETRIEVAL_POLICY
 from plato_rag.retrieval.reranker.source_priority import SourcePriorityReranker
 
 

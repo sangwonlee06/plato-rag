@@ -6,9 +6,9 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from plato_rag.config import Settings
 from plato_rag.db.repositories.chunk import ChunkRepository
 from plato_rag.dependencies import get_session, get_settings
-from plato_rag.config import Settings
 
 router = APIRouter()
 

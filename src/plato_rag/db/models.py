@@ -9,7 +9,7 @@ trust_tier is NOT stored — it is derived from source_class at query time.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import JSON, DateTime, Index, Integer, String, Text, func
@@ -50,7 +50,7 @@ class DocumentModel(Base):
         DateTime(timezone=True), server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), server_default=func.now(), onupdate=lambda: datetime.now(UTC)
     )
 
 
