@@ -1,0 +1,61 @@
+# Corpus manifest — declarative description of what the corpus contains.
+#
+# This file describes the intended corpus structure, source classes,
+# and collections. It serves as documentation and will be loaded as
+# configuration in future versions.
+#
+# The authoritative source class definitions are in domain/source.py.
+# This file mirrors them for operational clarity.
+
+version: "1.0"
+corpus_name: "plato_rag_philosophy"
+description: >
+  Philosophy corpus for Plato-mode RAG service.
+  Emphasis on foundational and classical philosophy
+  with high-trust reference grounding via SEP and IEP.
+
+source_classes:
+  primary_text:
+    trust_tier: 1
+    retrieval_priority: highest
+    description: "Original philosophical works in translation"
+
+  reference_encyclopedia:
+    trust_tier: 2
+    retrieval_priority: high
+    description: "High-trust peer-reviewed encyclopedic reference (SEP, IEP)"
+
+  peer_reviewed:
+    trust_tier: 3
+    retrieval_priority: standard
+    description: "Journal articles and scholarly monographs"
+
+  curated_bibliography:
+    trust_tier: 4
+    retrieval_priority: low
+    description: "Bibliographic and discovery resources"
+
+collections:
+  platonic_dialogues:
+    source_class: primary_text
+    parser: plaintext
+    chunker: section
+    status: mvp
+    notes: >
+      Stephanus numbering preserved. Speaker attribution required.
+      Prepared text format with [SECTION] markers.
+
+  sep:
+    source_class: reference_encyclopedia
+    parser: html
+    chunker: section
+    status: planned
+    notes: >
+      HTML parser not yet implemented. Section structure is authoritative.
+      Respect SEP terms of use.
+
+  iep:
+    source_class: reference_encyclopedia
+    parser: html
+    chunker: section
+    status: planned
