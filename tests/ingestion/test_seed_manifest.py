@@ -36,3 +36,24 @@ def test_public_iep_seed_spans_multiple_traditions() -> None:
         "jewish",
         "african",
     }.issubset(iep_traditions)
+
+
+def test_public_iep_seed_includes_core_topic_entries() -> None:
+    entries = load_manifest(_SEED_MANIFEST_PATH)
+
+    iep_entry_ids = {entry.id for entry in entries if entry.collection == "iep"}
+
+    assert {
+        "epistemology-iep",
+        "knowledge-iep",
+        "epistemic-justification-iep",
+        "causation-iep",
+        "free-will-iep",
+        "personal-identity-iep",
+        "substance-iep",
+        "metaethics-iep",
+        "virtue-ethics-iep",
+        "care-ethics-iep",
+        "consequentialism-iep",
+        "moral-realism-iep",
+    }.issubset(iep_entry_ids)
