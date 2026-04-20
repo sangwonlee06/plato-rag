@@ -11,6 +11,9 @@ import logging
 import re
 from typing import Protocol, cast
 
+from plato_rag.protocols.ingestion import ChunkConfig, ParsedDocument, ParsedSection, RawChunk
+
+
 class _TokenEncoder(Protocol):
     def encode(self, text: str) -> list[object]: ...
 
@@ -26,8 +29,6 @@ try:
     _tiktoken = cast(_TiktokenModule, _tiktoken_import)
 except ImportError:  # pragma: no cover - exercised only in minimal local environments
     _tiktoken = None
-
-from plato_rag.protocols.ingestion import ChunkConfig, ParsedDocument, ParsedSection, RawChunk
 
 logger = logging.getLogger(__name__)
 
