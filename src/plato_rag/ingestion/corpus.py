@@ -30,7 +30,7 @@ from plato_rag.protocols.ingestion import ChunkConfig, Chunker, Parser
 logger = logging.getLogger(__name__)
 
 FILE_BACKED_ENTRY_KINDS = {"prepared_text", "sep_html_file", "iep_html_file"}
-URL_BACKED_ENTRY_KINDS = {"sep_url", "iep_url"}
+URL_BACKED_ENTRY_KINDS = {"sep_url", "iep_url", "perseus_tei"}
 
 
 class CorpusBootstrapError(RuntimeError):
@@ -51,6 +51,7 @@ class CorpusEntry:
     edition: str | None = None
     source_url: str | None = None
     input_path: str | None = None
+    source_config: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -93,6 +94,7 @@ def load_manifest(manifest_path: Path) -> list[CorpusEntry]:
                 edition=_optional_str(raw_entry.get("edition")),
                 source_url=_optional_str(raw_entry.get("source_url")),
                 input_path=_optional_str(raw_entry.get("input_path")),
+                source_config=_string_mapping(raw_entry.get("source_config", {})),
             )
         )
     return manifest_entries
@@ -122,6 +124,10 @@ def validate_manifest_entries(
             raise ValueError(f"Entry {entry.id!r} is missing source_url")
         if entry.kind not in FILE_BACKED_ENTRY_KINDS | URL_BACKED_ENTRY_KINDS:
             raise ValueError(f"Unsupported manifest entry kind {entry.kind!r}")
+        if entry.kind == "perseus_tei" and "text_id" not in entry.source_config:
+            raise ValueError(
+                f"Entry {entry.id!r} is missing source_config.text_id for Perseus TEI ingestion"
+            )
 
 
 def select_entries(entries: list[CorpusEntry], selected_ids: set[str] | None) -> list[CorpusEntry]:
@@ -130,11 +136,16 @@ def select_entries(entries: list[CorpusEntry], selected_ids: set[str] | None) ->
     return [entry for entry in entries if entry.id in selected_ids]
 
 
-def parser_for(collection: str) -> Parser:
-    parser_type = COLLECTION_REGISTRY[collection].parser_type
+def parser_for(entry: CorpusEntry) -> Parser:
+    if entry.kind == "perseus_tei":
+        from plato_rag.ingestion.parsers.perseus_tei import PerseusTeiParser
+
+        return PerseusTeiParser(text_identifier=entry.source_config["text_id"])
+
+    parser_type = COLLECTION_REGISTRY[entry.collection].parser_type
     if parser_type == "plaintext":
         return PlaintextParser()
-    if parser_type == "html" and collection == "sep":
+    if parser_type == "html" and entry.collection == "sep":
         try:
             from plato_rag.local_only.sep_html import SepHtmlParser
         except ModuleNotFoundError as exc:
@@ -144,11 +155,11 @@ def parser_for(collection: str) -> Parser:
             ) from exc
 
         return SepHtmlParser()
-    if parser_type == "html" and collection == "iep":
+    if parser_type == "html" and entry.collection == "iep":
         from plato_rag.ingestion.parsers.iep_html import IepHtmlParser
 
         return IepHtmlParser()
-    raise ValueError(f"Unsupported parser for collection {collection!r}")
+    raise ValueError(f"Unsupported parser for collection {entry.collection!r}")
 
 
 def chunker_for(collection: str) -> Chunker:
@@ -257,7 +268,7 @@ async def ensure_seed_corpus(
                 raw_content = await load_raw_content(entry, manifest_dir, http_client=http_client)
                 service = IngestionService(
                     session=session,
-                    parser=parser_for(entry.collection),
+                    parser=parser_for(entry),
                     chunker=chunker_for(entry.collection),
                     embedder=embedder,
                 )
@@ -329,4 +340,15 @@ def _string_list(value: object) -> list[str]:
         if not isinstance(item, str):
             raise ValueError("Expected a list of strings")
         values.append(item)
+    return values
+
+
+def _string_mapping(value: object) -> dict[str, str]:
+    if not isinstance(value, dict):
+        raise ValueError("Expected a mapping of strings")
+    values: dict[str, str] = {}
+    for key, item in value.items():
+        if not isinstance(key, str) or not isinstance(item, str):
+            raise ValueError("Expected a mapping of strings")
+        values[key] = item
     return values

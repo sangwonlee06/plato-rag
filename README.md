@@ -28,6 +28,7 @@ What works:
 - Source classification with separate source classes and derived trust tiers
 - Seed corpus manifest and prepared primary-text inputs in the repo
 - public-safe seed corpus bootstrap
+- manifest-driven Perseus TEI ingestion for Plato primary texts
 - public IEP ingestion path with HTML parsing and URL-backed bootstrap
 - local-only SEP ingestion path with deployment guardrails
 - PostgreSQL + pgvector storage
@@ -36,7 +37,7 @@ What works:
 - Citation extraction with post-generation verification
 - Health and source-metadata endpoints
 - public container builds exclude local-only SEP code via `.dockerignore`
-- 56 passing pytest tests
+- 60 passing pytest tests
 
 What is still rough:
 
@@ -198,6 +199,23 @@ python scripts/ingest_corpus.py --dry-run
 python scripts/ingest_corpus.py
 ```
 
+The scalable path is manifest-driven:
+
+1. add a new entry to `data/corpus_seed.json`
+2. use `prepared_text` for local curated plaintext, `perseus_tei` for public-domain Plato texts from Perseus, or `iep_url` for public IEP entries
+3. for `perseus_tei`, set `source_config.text_id` to the TEI `<text n="...">` identifier
+4. validate only the new entries before embedding anything:
+
+```bash
+python scripts/ingest_corpus.py --dry-run --only euthydemus protagoras
+```
+
+5. ingest just those entries once the dry-run output looks right:
+
+```bash
+python scripts/ingest_corpus.py --only euthydemus protagoras
+```
+
 There is also a one-off primary text ingestion script:
 
 ```bash
@@ -213,7 +231,7 @@ python scripts/ingest_primary.py \
 
 Verified locally:
 
-- `pytest -q` -> 56 passing tests
+- `pytest -q`
 
 Common commands:
 
@@ -237,7 +255,7 @@ Plato mode in the chatbot expects this service to be available at that base URL 
 Short version:
 
 - ingest more texts
-- expand public IEP coverage beyond the initial seed entry
+- expand public IEP coverage beyond the current seed set
 - improve citation matching
 - build a real evaluation set
 - tighten operational behavior around retries and failures

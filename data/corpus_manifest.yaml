@@ -38,12 +38,13 @@ source_classes:
 collections:
   platonic_dialogues:
     source_class: primary_text
-    parser: plaintext
+    parser: plaintext/perseus_tei
     chunker: section
     status: mvp
     notes: >
       Stephanus numbering preserved. Speaker attribution required.
-      Prepared text format with [SECTION] markers.
+      Supports prepared text format with [SECTION] markers and
+      Perseus TEI bootstrap via manifest source_config.text_id.
 
   sep:
     source_class: reference_encyclopedia
@@ -61,4 +62,5 @@ collections:
     status: mvp
     notes: >
       HTML parser implemented. Preserve article title, author attribution,
-      substantive section structure, and stable entry URL.
+      substantive section structure, stable entry URL, and manifest-driven
+      URL bootstrap.

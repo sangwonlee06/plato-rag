@@ -76,6 +76,84 @@
       "period": "classical_greek",
       "topics": ["plato", "forms", "ethics", "epistemology", "metaphysics"],
       "source_url": "https://iep.utm.edu/plato/"
+    },
+    {
+      "id": "euthydemus",
+      "kind": "perseus_tei",
+      "collection": "platonic_dialogues",
+      "title": "Euthydemus",
+      "author": "Plato",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "W.R.M. Lamb",
+      "topics": ["eristic", "sophistry", "education", "virtue"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0178",
+      "source_config": {
+        "text_id": "Euthyd."
+      }
+    },
+    {
+      "id": "protagoras",
+      "kind": "perseus_tei",
+      "collection": "platonic_dialogues",
+      "title": "Protagoras",
+      "author": "Plato",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "W.R.M. Lamb",
+      "topics": ["virtue", "sophistry", "unity of virtue", "education"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0178",
+      "source_config": {
+        "text_id": "Prot."
+      }
+    },
+    {
+      "id": "gorgias",
+      "kind": "perseus_tei",
+      "collection": "platonic_dialogues",
+      "title": "Gorgias",
+      "author": "Plato",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "W.R.M. Lamb",
+      "topics": ["rhetoric", "justice", "pleasure", "politics"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0178",
+      "source_config": {
+        "text_id": "Gorg."
+      }
+    },
+    {
+      "id": "socrates-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Socrates (469—399 B.C.E.)",
+      "author": "James M. Ambury",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "topics": ["socrates", "elenchus", "virtue", "apology"],
+      "source_url": "https://iep.utm.edu/socrates/"
+    },
+    {
+      "id": "aristotle-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Aristotle (384 B.C.E.—322 B.C.E.)",
+      "author": "Justin Humphreys",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "topics": ["aristotle", "logic", "metaphysics", "ethics"],
+      "source_url": "https://iep.utm.edu/aristotle/"
+    },
+    {
+      "id": "ancient-greek-philosophy-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Ancient Greek Philosophy",
+      "author": "Jacob N. Graham",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "topics": ["ancient greek philosophy", "presocratics", "plato", "aristotle"],
+      "source_url": "https://iep.utm.edu/greekphi/"
     }
   ]
 }

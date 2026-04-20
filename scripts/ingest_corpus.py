@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Ingest a curated corpus manifest into the Plato RAG database.
 
-Supports two workflows:
+Supports manifest-driven workflows:
 
 - `prepared_text`: local primary-text files already in `[SECTION]` format
+- `perseus_tei`: fetch Perseus TEI XML and parse it into structured Plato sections
 - `sep_url`: fetch SEP HTML directly from the stable entry URL and parse it
 
 Use `--dry-run` to validate parsing and chunking without touching the database
@@ -57,16 +58,19 @@ async def _ingest_entries(
     timeout = httpx.Timeout(settings.bootstrap_http_timeout_seconds)
 
     try:
-        async with session_factory() as session, httpx.AsyncClient(
-            follow_redirects=True,
-            timeout=timeout,
-            headers={"User-Agent": "plato-rag-cli-ingestion/1.0"},
-        ) as http_client:
+        async with (
+            session_factory() as session,
+            httpx.AsyncClient(
+                follow_redirects=True,
+                timeout=timeout,
+                headers={"User-Agent": "plato-rag-cli-ingestion/1.0"},
+            ) as http_client,
+        ):
             for entry in entries:
                 raw_content = await load_raw_content(entry, manifest_dir, http_client=http_client)
                 service = IngestionService(
                     session=session,
-                    parser=parser_for(entry.collection),
+                    parser=parser_for(entry),
                     chunker=chunker_for(entry.collection),
                     embedder=embedder,
                 )
@@ -120,7 +124,7 @@ async def main() -> None:
                 section_count, chunk_count, parser_version = dry_run_entry(
                     entry=entry,
                     raw_content=raw_content,
-                    parser=parser_for(entry.collection),
+                    parser=parser_for(entry),
                     chunker=chunker_for(entry.collection),
                     chunk_config=chunk_config,
                 )

@@ -55,9 +55,46 @@ The next section begins here.
 
 ---
 
+## Manifest-driven remote sources
+
+The corpus manifest also supports remote source kinds for sources that can be
+parsed safely and reproducibly without a hand-prepared plaintext file.
+
+### `perseus_tei`
+
+Use for public-domain Plato texts available from the Perseus `dltext` TEI
+endpoint.
+
+```json
+{
+  "id": "protagoras",
+  "kind": "perseus_tei",
+  "collection": "platonic_dialogues",
+  "title": "Protagoras",
+  "author": "Plato",
+  "translation": "W.R.M. Lamb",
+  "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0178",
+  "source_config": {
+    "text_id": "Prot."
+  }
+}
+```
+
+`source_config.text_id` must match the TEI `<text n="...">` identifier inside
+the downloaded document. The parser uses Perseus `milestone unit="section"`
+markers as Stephanus references and preserves dialogue speaker changes in the
+section text.
+
+### `iep_url`
+
+Use for public IEP entries. No additional `source_config` is required.
+
+---
+
 ## What is manual
 
-Preparing a text for ingestion requires human editorial judgment:
+Preparing a text for ingestion requires human editorial judgment when you use
+`prepared_text`:
 
 1. **Obtain a public-domain translation.** The Jowett translations of Plato are
    in the public domain (Jowett died 1893). So are most pre-20th-century
@@ -87,6 +124,12 @@ Prerequisites: the package is installed (`pip install -e ".[dev]"`) and a
 PostgreSQL instance is running with the schema applied.
 
 ```bash
+# Validate specific manifest entries before embedding
+python scripts/ingest_corpus.py --dry-run --only protagoras socrates-iep
+
+# Ingest only those entries
+python scripts/ingest_corpus.py --only protagoras socrates-iep
+
 # Run the database migration first (once)
 PLATO_RAG_DATABASE_URL_SYNC=postgresql://postgres:postgres@localhost:5432/plato_rag \
   alembic upgrade head
@@ -124,8 +167,9 @@ PLATO_RAG_EMBEDDING_DIMENSIONS=3072
 | Meno (sample) | platonic_dialogues | committed | Jowett (public domain) | 10 |
 | Republic | platonic_dialogues | planned | — | — |
 | Phaedo | platonic_dialogues | planned | — | — |
+| Perseus Plato texts | platonic_dialogues | supported | public-domain Perseus translations | varies by work |
 | SEP entries | sep | local-only | — | — |
-| IEP entries | iep | parser implemented | live HTML bootstrap | varies by entry |
+| IEP entries | iep | supported | live HTML bootstrap | varies by entry |
 
 The sample covers the philosophically key passages but not the full text.
 Full-text ingestion requires manual preparation (see above).

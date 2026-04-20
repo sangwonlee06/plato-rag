@@ -311,3 +311,57 @@ async def test_bootstrap_supports_public_iep_url_entries(
 
     assert result.status == "bootstrapped"
     assert result.ingested_entries == 1
+
+
+@pytest.mark.asyncio
+async def test_bootstrap_supports_public_perseus_tei_entries(
+    tmp_path: Path,
+    fake_bootstrap_dependencies: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    manifest_path = _write_manifest(
+        tmp_path,
+        [
+            {
+                "id": "protagoras",
+                "kind": "perseus_tei",
+                "collection": "platonic_dialogues",
+                "title": "Protagoras",
+                "author": "Plato",
+                "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0178",
+                "source_config": {"text_id": "Prot."},
+            },
+        ],
+    )
+    monkeypatch.setattr(
+        "plato_rag.ingestion.corpus.httpx.AsyncClient",
+        lambda **_: _FakeHttpClient("perseus tei xml"),
+    )
+
+    result = await _run_bootstrap(manifest_path, _BootstrapState())
+
+    assert result.status == "bootstrapped"
+    assert result.ingested_entries == 1
+
+
+@pytest.mark.asyncio
+async def test_bootstrap_rejects_perseus_entries_without_text_identifier(
+    tmp_path: Path,
+    fake_bootstrap_dependencies: None,
+) -> None:
+    manifest_path = _write_manifest(
+        tmp_path,
+        [
+            {
+                "id": "gorgias",
+                "kind": "perseus_tei",
+                "collection": "platonic_dialogues",
+                "title": "Gorgias",
+                "author": "Plato",
+                "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0178",
+            },
+        ],
+    )
+
+    with pytest.raises(ValueError, match="source_config.text_id"):
+        await _run_bootstrap(manifest_path, _BootstrapState())
