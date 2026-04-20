@@ -9,13 +9,14 @@ from __future__ import annotations
 
 import logging
 import re
+from collections.abc import Sequence
 from typing import Protocol, cast
 
 from plato_rag.protocols.ingestion import ChunkConfig, ParsedDocument, ParsedSection, RawChunk
 
 
 class _TokenEncoder(Protocol):
-    def encode(self, text: str) -> list[object]: ...
+    def encode(self, text: str) -> Sequence[object]: ...
 
 
 class _TiktokenModule(Protocol):
@@ -34,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 class _WhitespaceEncoder:
-    def encode(self, text: str) -> list[object]:
+    def encode(self, text: str) -> Sequence[object]:
         return text.split()
 
 
