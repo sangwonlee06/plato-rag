@@ -26,6 +26,7 @@ class DocumentMetadata:
     # Source classification
     source_class: SourceClass
     collection: str
+    corpus_entry_id: str | None = None
 
     # Philosophy-specific (optional, varies by collection)
     tradition: str | None = None

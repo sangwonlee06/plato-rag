@@ -11,6 +11,7 @@ The project is past the sketch phase. The API, retrieval policy, parsers, ingest
 What works:
 
 - FastAPI app with versioned endpoints under `/v1`
+- Startup bootstrap for the seed corpus on fresh databases
 - Retrieval pipeline with staged search and trust-tier reranking
 - Source classification with separate source classes and derived trust tiers
 - Seed corpus manifest and prepared primary-text inputs in the repo
@@ -20,11 +21,10 @@ What works:
 - Anthropic generation
 - Citation extraction with post-generation verification
 - Health and source-metadata endpoints
-- 38 passing pytest tests
+- 41 passing pytest tests
 
 What is still rough:
 
-- Fresh databases start empty until you run ingestion
 - IEP parsing is not implemented yet
 - Citation extraction is regex-based and still limited
 - No proper evaluation harness yet
@@ -157,9 +157,9 @@ The important ones are:
 
 ## Ingestion
 
-The repo includes seed assets, but they are not loaded automatically.
+The repo includes a seed manifest, and the service now bootstraps it on startup when the database is empty or missing seed entries.
 
-That means a brand-new database will come up healthy and still have zero chunks until you ingest content.
+That only works after the schema is migrated. On a new environment, run migrations first and then start the service.
 
 Useful commands:
 
@@ -183,7 +183,7 @@ python scripts/ingest_primary.py \
 
 Verified locally:
 
-- `pytest -q` -> 38 passing tests
+- `pytest -q` -> 41 passing tests
 
 Common commands:
 

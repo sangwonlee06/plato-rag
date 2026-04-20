@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
+
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
@@ -26,5 +30,12 @@ class Settings(BaseSettings):
     api_version: str = "1.0.0"
     debug: bool = False
     log_level: str = "INFO"
+    bootstrap_enabled: bool = True
+    bootstrap_manifest_path: Path = _PROJECT_ROOT / "data" / "corpus_seed.json"
+    bootstrap_lock_id: int = 712_341_905
+    bootstrap_http_timeout_seconds: float = 30.0
+    bootstrap_max_chunk_tokens: int = 512
+    bootstrap_min_chunk_tokens: int = 50
+    bootstrap_overlap_tokens: int = 64
 
     model_config = {"env_prefix": "PLATO_RAG_"}

@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from plato_rag.db.models import DocumentModel
@@ -20,6 +20,7 @@ class DocumentRepository:
     async def create(self, meta: DocumentMetadata) -> uuid.UUID:
         model = DocumentModel(
             id=meta.id,
+            corpus_entry_id=meta.corpus_entry_id,
             title=meta.title,
             author=meta.author,
             source_class=meta.source_class.value,
@@ -38,6 +39,24 @@ class DocumentRepository:
         self._session.add(model)
         await self._session.flush()
         return model.id
+
+    async def count_total(self) -> int:
+        result = await self._session.execute(select(func.count(DocumentModel.id)))
+        return result.scalar_one()
+
+    async def list_corpus_entry_ids(self) -> set[str]:
+        result = await self._session.execute(
+            select(DocumentModel.corpus_entry_id).where(DocumentModel.corpus_entry_id.is_not(None))
+        )
+        return {row[0] for row in result.all() if row[0] is not None}
+
+    async def assign_corpus_entry_id(self, document_id: uuid.UUID, corpus_entry_id: str) -> None:
+        await self._session.execute(
+            update(DocumentModel)
+            .where(DocumentModel.id == document_id)
+            .values(corpus_entry_id=corpus_entry_id)
+        )
+        await self._session.flush()
 
     async def get_by_hash(self, raw_hash: str) -> DocumentMetadata | None:
         result = await self._session.execute(
@@ -62,6 +81,7 @@ class DocumentRepository:
     def _to_domain(model: DocumentModel) -> DocumentMetadata:
         return DocumentMetadata(
             id=model.id,
+            corpus_entry_id=model.corpus_entry_id,
             title=model.title,
             author=model.author,
             source_class=SourceClass(model.source_class),

@@ -25,6 +25,7 @@ class DocumentModel(Base):
     __tablename__ = "documents"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    corpus_entry_id: Mapped[str | None] = mapped_column(String(100), unique=True, index=True)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     author: Mapped[str] = mapped_column(String(300), nullable=False)
     source_class: Mapped[str] = mapped_column(String(50), nullable=False, index=True)

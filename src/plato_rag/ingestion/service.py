@@ -49,6 +49,8 @@ class IngestionService:
         raw_content: str,
         metadata: DocumentMetadata,
         chunk_config: ChunkConfig,
+        *,
+        commit: bool = True,
     ) -> IngestResult:
         # Dedup check
         content_hash = hashlib.sha256(raw_content.encode()).hexdigest()
@@ -102,6 +104,7 @@ class IngestionService:
         embeddings = await self._embedder.embed(texts)
 
         count = await self._chunk_repo.bulk_create(chunks, embeddings)
-        await self._session.commit()
+        if commit:
+            await self._session.commit()
 
         return IngestResult(document_id=metadata.id, chunk_count=count)
