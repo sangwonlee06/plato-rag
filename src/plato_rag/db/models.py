@@ -47,9 +47,7 @@ class DocumentModel(Base):
     parser_version: Mapped[str | None] = mapped_column(String(50))
     raw_hash: Mapped[str | None] = mapped_column(String(64), unique=True)
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=lambda: datetime.now(UTC)
     )
@@ -90,10 +88,6 @@ class ChunkModel(Base):
     overlap_tokens: Mapped[int | None] = mapped_column(Integer)
     embedding_model: Mapped[str | None] = mapped_column(String(100))
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    __table_args__ = (
-        Index("ix_chunks_source_class_collection", "source_class", "collection"),
-    )
+    __table_args__ = (Index("ix_chunks_source_class_collection", "source_class", "collection"),)

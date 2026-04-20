@@ -24,6 +24,9 @@ src/plato_rag/
 │       ├── health.py     GET /v1/health
 │       └── sources.py    GET /v1/sources
 │
+├── guardrails/       Deployment and query-time source-access policy checks.
+│   └── source_access.py  Public-vs-local-only collection enforcement
+│
 ├── protocols/        Python Protocol interfaces for internal contracts.
 │   ├── ingestion.py    Parser, Chunker, ParsedDocument, RawChunk
 │   ├── embedding.py    Embedder
@@ -41,12 +44,14 @@ src/plato_rag/
 ├── ingestion/
 │   ├── service.py      IngestionService: parse → chunk → embed → store
 │   ├── parsers/
-│   │   ├── plaintext.py  [SECTION]-marker format for primary texts
-│   │   └── sep_html.py   SEP entry HTML parser with numbered sections
+│   │   └── plaintext.py  [SECTION]-marker format for primary texts
 │   ├── chunkers/
 │   │   └── section.py    Section-aware splitting with location preservation
 │   └── embedders/
 │       └── openai.py     text-embedding-3-large
+│
+├── local_only/
+│   └── sep_html.py      SEP entry HTML parser kept out of public builds
 │
 ├── generation/
 │   ├── service.py           GenerationService: prompt → LLM → citation extraction
@@ -84,6 +89,8 @@ These are the rules that protect the system's integrity. Breaking them creates d
 
 **6. Services accept protocols.** `IngestionService` takes `Parser`, `Chunker`, and an embedder as constructor arguments. The retrieval and generation services are moving in this direction. Concrete implementations are wired in `dependencies.py` and `main.py`, not in the service constructors.
 
+**7. Local-only sources are opt-in and must stay outside public deployments.** Public-safe seed data lives under `data/`. SEP manifests live under `local_only/sep/`, the SEP parser lives under `src/plato_rag/local_only/`, startup validation blocks local-only enablement in `public` scope, and default container builds exclude local-only directories via `.dockerignore`.
+
 ## Pipeline flow
 
 ### Query (POST /v1/query)
@@ -105,7 +112,7 @@ Request
 ### Ingestion (CLI script)
 
 ```
-Prepared text file or SEP HTML
+Prepared text file or local-only SEP HTML
   → parse (PlaintextParser or SepHtmlParser: extract sections, location refs, speakers/entry metadata)
   → chunk (SectionChunker: split at section boundaries, respect token limits)
   → embed (OpenAI: batch embed all chunks)

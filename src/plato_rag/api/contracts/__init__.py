@@ -13,6 +13,7 @@ from plato_rag.api.contracts.common import (
     ConversationTurn,
     InterpretationLevel,
     SourceClass,
+    SourceExposure,
     compat_source_type_for,
 )
 from plato_rag.api.contracts.grounding import GroundingResponse, SourceCoverageResponse
@@ -34,6 +35,7 @@ __all__ = [
     "QueryResponse",
     "RetrievedChunkResponse",
     "SourceClass",
+    "SourceExposure",
     "SourceCoverageResponse",
     "compat_source_type_for",
 ]

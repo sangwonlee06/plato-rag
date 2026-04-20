@@ -291,22 +291,27 @@ class _SepArticleCollector(HTMLParser):
                     system=LocationSystem.SECTION,
                     value=self._current_section.location_value,
                 )
-            self.sections.append(ParsedSection(
-                title=self._current_section.title,
-                text=text,
-                location_ref=location_ref,
-                level=self._current_section.level,
-            ))
+            self.sections.append(
+                ParsedSection(
+                    title=self._current_section.title,
+                    text=text,
+                    location_ref=location_ref,
+                    level=self._current_section.level,
+                )
+            )
         self._current_section = None
 
     def _finalize_article(self) -> None:
         self._flush_block()
         if self._preamble_blocks:
-            self.sections.insert(0, ParsedSection(
-                title="Preamble",
-                text="\n\n".join(self._preamble_blocks),
-                level=0,
-            ))
+            self.sections.insert(
+                0,
+                ParsedSection(
+                    title="Preamble",
+                    text="\n\n".join(self._preamble_blocks),
+                    level=0,
+                ),
+            )
             self._preamble_blocks = []
         self._flush_current_section()
         self._inside_article = False
@@ -335,10 +340,12 @@ class SepHtmlParser:
             extra_metadata["last_updated"] = collector.last_updated
 
         if not collector.sections:
-            collector.sections.append(ParsedSection(
-                title=metadata.title,
-                text=_normalize_whitespace(raw_content),
-            ))
+            collector.sections.append(
+                ParsedSection(
+                    title=metadata.title,
+                    text=_normalize_whitespace(raw_content),
+                )
+            )
 
         return ParsedDocument(
             metadata=metadata,

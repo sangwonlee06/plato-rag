@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
+from plato_rag.config import Settings
+from plato_rag.dependencies import get_settings
 from plato_rag.domain.source import (
     COLLECTION_REGISTRY,
     SOURCE_CLASS_REGISTRY,
     SourceClass,
 )
+from plato_rag.guardrails.source_access import visible_collection_names
 
 router = APIRouter()
 
@@ -34,8 +37,11 @@ class SourcesResponse(BaseModel):
 
 
 @router.get("/sources", response_model=SourcesResponse)
-async def sources() -> SourcesResponse:
+async def sources(
+    settings: Settings = Depends(get_settings),
+) -> SourcesResponse:
     result: list[SourceClassResponse] = []
+    visible = set(visible_collection_names(settings))
 
     for sc, info in SOURCE_CLASS_REGISTRY.items():
         collections = [
@@ -46,14 +52,18 @@ async def sources() -> SourcesResponse:
                 chunker_type=col.chunker_type,
             )
             for col in COLLECTION_REGISTRY.values()
-            if col.source_class == sc
+            if col.source_class == sc and col.name in visible
         ]
-        result.append(SourceClassResponse(
-            source_class=sc,
-            trust_tier=info.trust_tier,
-            label=info.label,
-            description=info.description,
-            collections=collections,
-        ))
+        if not collections:
+            continue
+        result.append(
+            SourceClassResponse(
+                source_class=sc,
+                trust_tier=info.trust_tier,
+                label=info.label,
+                description=info.description,
+                collections=collections,
+            )
+        )
 
     return SourcesResponse(source_classes=result)

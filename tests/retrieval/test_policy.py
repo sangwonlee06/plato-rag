@@ -70,9 +70,7 @@ class TestSourcePriorityReranker:
         # SEP at 0.90 * 1.15 = 1.035 should outrank primary at 0.50 * 1.30 = 0.65
         assert result[0].chunk.source_class == SourceClass.REFERENCE_ENCYCLOPEDIA
 
-    def test_boosted_scores_are_set(
-        self, primary_chunk: ChunkData
-    ) -> None:
+    def test_boosted_scores_are_set(self, primary_chunk: ChunkData) -> None:
         reranker = SourcePriorityReranker()
         chunks = [ScoredChunk(chunk=primary_chunk, similarity_score=0.80)]
         result = reranker.rerank(chunks, "test", PLATO_RETRIEVAL_POLICY)

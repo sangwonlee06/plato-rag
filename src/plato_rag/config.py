@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings
 
@@ -30,8 +31,14 @@ class Settings(BaseSettings):
     api_version: str = "1.0.0"
     debug: bool = False
     log_level: str = "INFO"
+    deployment_scope: Literal["public", "internal", "local"] = "local"
+    enable_local_only_sep: bool = False
+    public_allowed_collections: str = ""
+    local_only_allowed_collections: str = "sep"
+    fail_start_on_restricted_config: bool = True
     bootstrap_enabled: bool = True
     bootstrap_manifest_path: Path = _PROJECT_ROOT / "data" / "corpus_seed.json"
+    local_only_manifest_path: Path = _PROJECT_ROOT / "local_only" / "sep" / "corpus_seed.local.json"
     bootstrap_lock_id: int = 712_341_905
     bootstrap_http_timeout_seconds: float = 30.0
     bootstrap_max_chunk_tokens: int = 512

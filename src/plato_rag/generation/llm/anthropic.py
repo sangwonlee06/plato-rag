@@ -30,9 +30,7 @@ class AnthropicLLM:
                 system_msg = msg.content
             else:
                 # role is "user" or "assistant" by protocol contract
-                conversation.append(
-                    cast(MessageParam, {"role": msg.role, "content": msg.content})
-                )
+                conversation.append(cast(MessageParam, {"role": msg.role, "content": msg.content}))
 
         response = await self._client.messages.create(
             model=self._model,
@@ -42,9 +40,7 @@ class AnthropicLLM:
         )
         block = response.content[0]
         if not isinstance(block, TextBlock):
-            raise TypeError(
-                f"Expected TextBlock in response, got {type(block).__name__}"
-            )
+            raise TypeError(f"Expected TextBlock in response, got {type(block).__name__}")
         return block.text
 
     def model_name(self) -> str:

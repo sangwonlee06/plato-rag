@@ -21,6 +21,7 @@ from plato_rag.domain.source import SourceClass
 @dataclass(frozen=True)
 class TierBoost:
     """Score multiplier per trust tier. > 1.0 promotes, < 1.0 demotes."""
+
     trust_tier: int
     boost_factor: float
 
@@ -32,6 +33,7 @@ class SourceQuota:
     If the corpus has no matching chunks above the similarity threshold,
     the min_chunks guarantee is silently unmet.
     """
+
     source_class: SourceClass
     min_chunks: int
     max_chunks: int | None = None
@@ -44,6 +46,7 @@ class SearchStage:
     Stages are executed in order. The retrieval service may skip later
     stages if earlier stages produced enough high-trust results.
     """
+
     source_classes: tuple[SourceClass, ...]
     max_candidates: int
 
@@ -51,6 +54,7 @@ class SearchStage:
 @dataclass(frozen=True)
 class GroundingRule:
     """Thresholds for interpretation level assessment."""
+
     direct_min_primary: int = 1
     direct_min_high_trust: int = 2
     flag_low_trust_only: bool = True

@@ -16,10 +16,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from plato_rag.db.repositories.chunk import ChunkRepository
 from plato_rag.db.repositories.document import DocumentRepository
 from plato_rag.domain.document import DocumentMetadata
-from plato_rag.domain.source import COLLECTION_REGISTRY, collection_source_class
+from plato_rag.domain.source import (
+    COLLECTION_REGISTRY,
+    collection_source_class,
+    is_local_only_collection,
+)
 from plato_rag.ingestion.chunkers.section import SectionChunker
 from plato_rag.ingestion.parsers.plaintext import PlaintextParser
-from plato_rag.ingestion.parsers.sep_html import SepHtmlParser
 from plato_rag.ingestion.service import IngestionService
 from plato_rag.protocols.embedding import Embedder
 from plato_rag.protocols.ingestion import ChunkConfig, Chunker, Parser
@@ -73,24 +76,30 @@ def load_manifest(manifest_path: Path) -> list[CorpusEntry]:
     for raw_entry in entries:
         if not isinstance(raw_entry, dict):
             raise ValueError("Each manifest entry must be a mapping")
-        manifest_entries.append(CorpusEntry(
-            id=str(raw_entry["id"]),
-            kind=str(raw_entry["kind"]),
-            collection=str(raw_entry["collection"]),
-            title=str(raw_entry["title"]),
-            author=str(raw_entry["author"]),
-            tradition=_optional_str(raw_entry.get("tradition")),
-            period=_optional_str(raw_entry.get("period")),
-            topics=_string_list(raw_entry.get("topics", [])),
-            translation=_optional_str(raw_entry.get("translation")),
-            edition=_optional_str(raw_entry.get("edition")),
-            source_url=_optional_str(raw_entry.get("source_url")),
-            input_path=_optional_str(raw_entry.get("input_path")),
-        ))
+        manifest_entries.append(
+            CorpusEntry(
+                id=str(raw_entry["id"]),
+                kind=str(raw_entry["kind"]),
+                collection=str(raw_entry["collection"]),
+                title=str(raw_entry["title"]),
+                author=str(raw_entry["author"]),
+                tradition=_optional_str(raw_entry.get("tradition")),
+                period=_optional_str(raw_entry.get("period")),
+                topics=_string_list(raw_entry.get("topics", [])),
+                translation=_optional_str(raw_entry.get("translation")),
+                edition=_optional_str(raw_entry.get("edition")),
+                source_url=_optional_str(raw_entry.get("source_url")),
+                input_path=_optional_str(raw_entry.get("input_path")),
+            )
+        )
     return manifest_entries
 
 
-def validate_manifest_entries(entries: list[CorpusEntry]) -> None:
+def validate_manifest_entries(
+    entries: list[CorpusEntry],
+    *,
+    allow_local_only_collections: bool = False,
+) -> None:
     seen_ids: set[str] = set()
     for entry in entries:
         if entry.id in seen_ids:
@@ -99,6 +108,11 @@ def validate_manifest_entries(entries: list[CorpusEntry]) -> None:
 
         if entry.collection not in COLLECTION_REGISTRY:
             raise ValueError(f"Unknown collection {entry.collection!r} in entry {entry.id!r}")
+        if is_local_only_collection(entry.collection) and not allow_local_only_collections:
+            raise ValueError(
+                f"Collection {entry.collection!r} in entry {entry.id!r} is local-only "
+                "and cannot be bootstrapped in public-safe mode"
+            )
         if entry.kind in {"prepared_text", "sep_html_file"} and entry.input_path is None:
             raise ValueError(f"Entry {entry.id!r} is missing input_path")
         if entry.kind == "sep_url" and entry.source_url is None:
@@ -118,6 +132,14 @@ def parser_for(collection: str) -> Parser:
     if parser_type == "plaintext":
         return PlaintextParser()
     if parser_type == "html" and collection == "sep":
+        try:
+            from plato_rag.local_only.sep_html import SepHtmlParser
+        except ModuleNotFoundError as exc:
+            raise CorpusBootstrapError(
+                "SEP parser support is unavailable in this build. Local-only SEP "
+                "components must remain excluded from public deployments."
+            ) from exc
+
         return SepHtmlParser()
     raise ValueError(f"Unsupported parser for collection {collection!r}")
 
@@ -175,13 +197,17 @@ async def ensure_seed_corpus(
     *,
     embedder: Embedder,
     manifest_path: Path,
+    allow_local_only_collections: bool = False,
     chunk_config: ChunkConfig,
     advisory_lock_id: int,
     http_timeout_seconds: float,
 ) -> CorpusBootstrapResult:
     manifest_path = manifest_path.resolve()
     entries = load_manifest(manifest_path)
-    validate_manifest_entries(entries)
+    validate_manifest_entries(
+        entries,
+        allow_local_only_collections=allow_local_only_collections,
+    )
     manifest_dir = manifest_path.parent
 
     doc_repo = DocumentRepository(session)

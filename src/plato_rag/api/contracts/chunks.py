@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from plato_rag.api.contracts.common import CompatSourceType, SourceClass
+from plato_rag.api.contracts.common import CompatSourceType, SourceClass, SourceExposure
 
 
 class ChunkMetadataResponse(BaseModel):
@@ -45,6 +45,7 @@ class RetrievedChunkResponse(BaseModel):
     # Source classification — dual representation
     source_type: CompatSourceType
     source_class: SourceClass
+    source_exposure: SourceExposure
     trust_tier: int
 
     # Citation fields

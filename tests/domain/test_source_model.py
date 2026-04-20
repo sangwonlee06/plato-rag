@@ -6,8 +6,13 @@ from plato_rag.domain.location import LocationRef, LocationSystem
 from plato_rag.domain.source import (
     SOURCE_CLASS_REGISTRY,
     SourceClass,
+    SourceExposure,
+    collection_exposure,
     collection_source_class,
     is_high_trust,
+    is_local_only_collection,
+    local_only_collection_names,
+    public_collection_names,
     trust_tier_for,
 )
 
@@ -38,11 +43,23 @@ class TestCollectionRegistry:
     def test_sep_is_reference_encyclopedia(self) -> None:
         assert collection_source_class("sep") == SourceClass.REFERENCE_ENCYCLOPEDIA
 
+    def test_sep_is_local_only(self) -> None:
+        assert collection_exposure("sep") == SourceExposure.LOCAL_ONLY
+        assert is_local_only_collection("sep")
+
     def test_iep_is_reference_encyclopedia(self) -> None:
         assert collection_source_class("iep") == SourceClass.REFERENCE_ENCYCLOPEDIA
 
     def test_platonic_dialogues_is_primary(self) -> None:
         assert collection_source_class("platonic_dialogues") == SourceClass.PRIMARY_TEXT
+        assert collection_exposure("platonic_dialogues") == SourceExposure.PUBLIC
+
+    def test_public_collection_names_excludes_sep(self) -> None:
+        assert "sep" not in public_collection_names()
+        assert "platonic_dialogues" in public_collection_names()
+
+    def test_local_only_collection_names_contains_sep(self) -> None:
+        assert local_only_collection_names() == {"sep"}
 
     def test_unknown_collection_raises(self) -> None:
         with pytest.raises(ValueError, match="Unknown collection"):

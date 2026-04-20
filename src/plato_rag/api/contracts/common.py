@@ -6,7 +6,7 @@ from enum import StrEnum
 
 from pydantic import BaseModel
 
-from plato_rag.domain.source import SourceClass
+from plato_rag.domain.source import SourceClass, SourceExposure
 
 __all__ = [
     "ChatMode",
@@ -15,6 +15,7 @@ __all__ = [
     "ConversationTurn",
     "InterpretationLevel",
     "SourceClass",
+    "SourceExposure",
     "compat_source_type_for",
 ]
 

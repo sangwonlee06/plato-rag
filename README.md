@@ -1,5 +1,17 @@
 # Plato RAG
 
+Naming note: "Plato RAG" refers to the philosophy product context and the initial Plato-focused corpus. It does not imply any institutional affiliation.
+
+## Important Stanford / SEP Notice
+
+This project is an independent software project. It is not affiliated with, endorsed by, sponsored by, or otherwise connected to Stanford University or the Stanford Encyclopedia of Philosophy.
+
+SEP-related components, if present anywhere in this repository, are not part of the default deployable service configuration and are not intended to be exposed through any public-facing deployment.
+
+Any SEP-related code, parsers, manifests, ingestion logic, or experiments are retained solely for local/personal experimentation or internal development purposes.
+
+Do not deploy SEP-related functionality as a public-facing service or expose it at any public URL.
+
 Plato RAG is a separate FastAPI service that handles retrieval and answer grounding for Plato mode.
 
 It sits beside the chatbot app, not inside it. The NestJS backend sends it a question, the service retrieves relevant chunks, asks the model for an answer, checks the citations it gets back, and returns a structured response.
@@ -15,13 +27,15 @@ What works:
 - Retrieval pipeline with staged search and trust-tier reranking
 - Source classification with separate source classes and derived trust tiers
 - Seed corpus manifest and prepared primary-text inputs in the repo
-- SEP ingestion path
+- public-safe seed corpus bootstrap
+- local-only SEP ingestion path with deployment guardrails
 - PostgreSQL + pgvector storage
 - OpenAI embeddings
 - Anthropic generation
 - Citation extraction with post-generation verification
 - Health and source-metadata endpoints
-- 41 passing pytest tests
+- public container builds exclude local-only SEP code via `.dockerignore`
+- 52 passing pytest tests
 
 What is still rough:
 
@@ -53,6 +67,7 @@ Request shape:
   "conversation_history": [],
   "options": {
     "max_chunks": 5,
+    "allowed_collections": ["platonic_dialogues"],
     "include_debug": false
   }
 }
@@ -85,7 +100,7 @@ In plain terms, the service would rather answer from a primary text and a strong
 Current order of preference:
 
 1. primary philosophical texts
-2. reference encyclopedias like SEP
+2. public-safe reference encyclopedias like IEP
 3. broader secondary scholarship
 
 That policy shows up in a few places:
@@ -104,11 +119,14 @@ If the service cannot ground an answer well, it is supposed to say so.
 │   ├── api/
 │   ├── db/
 │   ├── domain/
+│   ├── guardrails/
 │   ├── generation/
 │   ├── ingestion/
+│   ├── local_only/
 │   ├── protocols/
 │   └── retrieval/
 ├── data/
+├── local_only/
 ├── scripts/
 └── tests/
 ```
@@ -154,10 +172,22 @@ The important ones are:
 | `PLATO_RAG_DATABASE_URL` | async Postgres connection string |
 | `PLATO_RAG_OPENAI_API_KEY` | embedding API key |
 | `PLATO_RAG_ANTHROPIC_API_KEY` | generation API key |
+| `PLATO_RAG_DEPLOYMENT_SCOPE` | `public`, `internal`, or `local` |
+| `PLATO_RAG_PUBLIC_ALLOWED_COLLECTIONS` | Comma-separated public-safe collection allowlist |
+| `PLATO_RAG_ENABLE_LOCAL_ONLY_SEP` | Enables local-only SEP bootstrap in non-public environments |
+| `PLATO_RAG_LOCAL_ONLY_MANIFEST_PATH` | Local-only SEP manifest path |
+| `PLATO_RAG_FAIL_START_ON_RESTRICTED_CONFIG` | Fails startup instead of warning on unsafe source configuration |
 
 ## Ingestion
 
 The repo includes a seed manifest, and the service now bootstraps it on startup when the database is empty or missing seed entries.
+
+Default behavior is public-safe:
+
+- `data/corpus_seed.json` contains only deployable public-safe entries
+- SEP entries live under `local_only/sep/`
+- SEP is never bootstrapped unless `PLATO_RAG_ENABLE_LOCAL_ONLY_SEP=true` in a non-public deployment
+- default Docker builds exclude `local_only/` and `src/plato_rag/local_only/`
 
 That only works after the schema is migrated. On a new environment, run migrations first and then start the service.
 
@@ -183,7 +213,7 @@ python scripts/ingest_primary.py \
 
 Verified locally:
 
-- `pytest -q` -> 41 passing tests
+- `pytest -q` -> 53 passing tests
 
 Common commands:
 

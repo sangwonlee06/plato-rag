@@ -29,8 +29,18 @@ from plato_rag.api.contracts import (
 from plato_rag.config import Settings
 from plato_rag.dependencies import get_generation_service, get_retrieval_service, get_settings
 from plato_rag.domain.chunk import ScoredChunk
-from plato_rag.domain.source import SourceClass, trust_tier_for
+from plato_rag.domain.source import (
+    SourceClass,
+    collection_exposure,
+    trust_tier_for,
+)
 from plato_rag.generation.service import GenerationService
+from plato_rag.guardrails.source_access import (
+    SourceAccessPolicyError,
+    assert_citations_match_allowed_collections,
+    assert_retrieved_chunks_match_allowed_collections,
+    resolve_allowed_collections,
+)
 from plato_rag.retrieval.policy import PLATO_RETRIEVAL_POLICY
 from plato_rag.retrieval.service import RetrievalService
 
@@ -49,6 +59,13 @@ async def query(
         raise HTTPException(status_code=501, detail=msg)
 
     request_id = f"req_{uuid.uuid4().hex[:12]}"
+    try:
+        allowed_collections = resolve_allowed_collections(
+            settings,
+            request.options.allowed_collections,
+        )
+    except SourceAccessPolicyError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     # Apply request options to policy
     policy = PLATO_RETRIEVAL_POLICY
@@ -60,7 +77,15 @@ async def query(
         query=request.question,
         policy=policy,
         source_filter=request.options.source_filter,
+        allowed_collections=allowed_collections,
     )
+    try:
+        assert_retrieved_chunks_match_allowed_collections(
+            retrieval_result.chunks,
+            allowed_collections,
+        )
+    except SourceAccessPolicyError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
     # Generate
     history = [(turn.role.value.lower(), turn.content) for turn in request.conversation_history]
@@ -69,6 +94,13 @@ async def query(
         chunks=retrieval_result.chunks,
         conversation_history=history or None,
     )
+    try:
+        assert_citations_match_allowed_collections(
+            gen_result.citations,
+            allowed_collections,
+        )
+    except SourceAccessPolicyError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
     # Build response — mapping domain types to API contracts
     chunk_responses = [_chunk_to_response(sc) for sc in retrieval_result.chunks]
@@ -76,20 +108,24 @@ async def query(
     citation_responses = []
     for cit in gen_result.citations:
         tier = trust_tier_for(cit.source_class) if cit.source_class else 0
-        citation_responses.append(CitationResponse(
-            work=cit.work,
-            author=cit.author or "",
-            location=cit.location,
-            excerpt=cit.excerpt,
-            source_type=(
-                compat_source_type_for(cit.source_class)
-                if cit.source_class
-                else CompatSourceType.SECONDARY
-            ),
-            source_class=cit.source_class or SourceClass.PEER_REVIEWED,
-            trust_tier=tier,
-            access_url=cit.access_url,
-        ))
+        citation_responses.append(
+            CitationResponse(
+                work=cit.work,
+                author=cit.author or "",
+                location=cit.location,
+                excerpt=cit.excerpt,
+                source_type=(
+                    compat_source_type_for(cit.source_class)
+                    if cit.source_class
+                    else CompatSourceType.SECONDARY
+                ),
+                source_class=cit.source_class or SourceClass.PEER_REVIEWED,
+                collection=cit.collection,
+                source_exposure=cit.source_exposure,
+                trust_tier=tier,
+                access_url=cit.access_url,
+            )
+        )
 
     grounding = retrieval_result.grounding
     grounding_response = GroundingResponse(
@@ -142,6 +178,7 @@ def _chunk_to_response(sc: ScoredChunk) -> RetrievedChunkResponse:
         text=chunk.text,
         source_type=compat_source_type_for(chunk.source_class),
         source_class=chunk.source_class,
+        source_exposure=collection_exposure(chunk.collection),
         trust_tier=tier,
         work=chunk.work_title,
         author=chunk.author,

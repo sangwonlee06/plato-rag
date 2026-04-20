@@ -1,7 +1,7 @@
 """Plato RAG Service.
 
 Academically rigorous philosophy retrieval-augmented generation,
-designed for source fidelity, citation quality, and SEP/IEP-first
+designed for source fidelity, citation quality, and source-priority
 grounding.
 """
 

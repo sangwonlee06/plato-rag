@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from plato_rag.api.contracts.common import CompatSourceType, SourceClass
+from plato_rag.api.contracts.common import (
+    CompatSourceType,
+    SourceClass,
+    SourceExposure,
+)
 
 
 class CitationResponse(BaseModel):
@@ -17,6 +21,8 @@ class CitationResponse(BaseModel):
 
     source_type: CompatSourceType
     source_class: SourceClass
+    collection: str | None = None
+    source_exposure: SourceExposure | None = None
     trust_tier: int
 
     access_url: str | None = None

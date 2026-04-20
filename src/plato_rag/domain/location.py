@@ -81,8 +81,8 @@ class LocationRef:
             return True
         # Handle section prefix variations: "2.1" matches "Section 2.1" matches "§2.1"
         for prefix in ("section ", "\u00a7", "sec. ", "sec "):
-            stripped_self = normalized_self[len(prefix):].strip()
-            stripped_other = normalized_other[len(prefix):].strip()
+            stripped_self = normalized_self[len(prefix) :].strip()
+            stripped_other = normalized_other[len(prefix) :].strip()
             if normalized_self.startswith(prefix) and stripped_self == normalized_other:
                 return True
             if normalized_other.startswith(prefix) and normalized_self == stripped_other:

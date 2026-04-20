@@ -18,9 +18,10 @@ from __future__ import annotations
 import re
 
 from plato_rag.domain.chunk import ChunkData
+from plato_rag.domain.source import collection_exposure
 from plato_rag.protocols.generation import ExtractedCitation
 
-CITATION_PATTERN = re.compile(r'\[(?P<content>[^\]]+)\]')
+CITATION_PATTERN = re.compile(r"\[(?P<content>[^\]]+)\]")
 
 
 class BasicCitationExtractor:
@@ -42,26 +43,30 @@ class BasicCitationExtractor:
         for work, location in raw_citations:
             match = self._match_to_chunk(work, location, retrieved_chunks)
             if match:
-                verified.append(ExtractedCitation(
-                    work=match.work_title,
-                    location=match.location_ref.display() if match.location_ref else location,
-                    excerpt=match.text[:200] if match.text else None,
-                    matched_chunk_id=match.id,
-                    is_grounded=True,
-                    source_class=match.source_class,
-                    author=match.author,
-                    access_url=(
-                        match.extra_metadata.get("entry_url")
-                        if match.extra_metadata
-                        else None
-                    ),
-                ))
+                verified.append(
+                    ExtractedCitation(
+                        work=match.work_title,
+                        location=match.location_ref.display() if match.location_ref else location,
+                        excerpt=match.text[:200] if match.text else None,
+                        matched_chunk_id=match.id,
+                        is_grounded=True,
+                        source_class=match.source_class,
+                        collection=match.collection,
+                        source_exposure=collection_exposure(match.collection),
+                        author=match.author,
+                        access_url=(
+                            match.extra_metadata.get("entry_url") if match.extra_metadata else None
+                        ),
+                    )
+                )
             else:
-                verified.append(ExtractedCitation(
-                    work=work,
-                    location=location,
-                    is_grounded=False,
-                ))
+                verified.append(
+                    ExtractedCitation(
+                        work=work,
+                        location=location,
+                        is_grounded=False,
+                    )
+                )
 
         return verified
 
@@ -77,14 +82,14 @@ class BasicCitationExtractor:
             seen.add(content)
 
             # Try "Author, SEP §Section" or "Author, IEP §Section"
-            sep_match = re.match(r'(.+?),\s*(SEP|IEP)\s*§?\s*(.+)', content)
+            sep_match = re.match(r"(.+?),\s*(SEP|IEP)\s*§?\s*(.+)", content)
             if sep_match:
                 results.append((sep_match.group(2), sep_match.group(3).strip()))
                 continue
 
             # Try "Work Location" where location starts with a digit or §
             parts = content.rsplit(None, 1)
-            if len(parts) == 2 and re.match(r'[\d§p]', parts[1]):
+            if len(parts) == 2 and re.match(r"[\d§p]", parts[1]):
                 results.append((parts[0], parts[1]))
                 continue
 
@@ -102,8 +107,7 @@ class BasicCitationExtractor:
         for chunk in chunks:
             # Match by work title (substring either direction)
             title_match = (
-                work_lower in chunk.work_title.lower()
-                or chunk.work_title.lower() in work_lower
+                work_lower in chunk.work_title.lower() or chunk.work_title.lower() in work_lower
             )
             # Match by collection for SEP/IEP references
             collection_match = work_lower in ("sep", "iep") and chunk.collection == work_lower

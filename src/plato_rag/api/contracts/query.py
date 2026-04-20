@@ -13,6 +13,7 @@ from plato_rag.api.contracts.grounding import GroundingResponse
 class QueryOptions(BaseModel):
     max_chunks: int = Field(default=5, ge=1, le=20)
     source_filter: list[SourceClass] | None = None
+    allowed_collections: list[str] | None = None
     include_debug: bool = False
 
 

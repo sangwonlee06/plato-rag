@@ -57,6 +57,7 @@ class RetrievalService:
         query: str,
         policy: RetrievalPolicy,
         source_filter: list[SourceClass] | None = None,
+        allowed_collections: list[str] | None = None,
     ) -> RetrievalResult:
         vectors = await self._embedder.embed([query])
         query_vector = vectors[0]
@@ -76,7 +77,10 @@ class RetrievalService:
 
             results = await self._store.search(
                 query_vector=query_vector,
-                filters=SearchFilters(source_classes=stage_classes),
+                filters=SearchFilters(
+                    source_classes=stage_classes,
+                    collections=allowed_collections,
+                ),
                 limit=stage.max_candidates,
             )
             above = [r for r in results if r.similarity_score >= policy.similarity_threshold]
@@ -85,9 +89,7 @@ class RetrievalService:
 
             # Early exit: if we already have enough high-trust chunks,
             # skip lower-priority stages
-            high_trust_count = sum(
-                1 for c in all_candidates if is_high_trust(c.chunk.source_class)
-            )
+            high_trust_count = sum(1 for c in all_candidates if is_high_trust(c.chunk.source_class))
             if high_trust_count >= policy.max_chunks:
                 break
 

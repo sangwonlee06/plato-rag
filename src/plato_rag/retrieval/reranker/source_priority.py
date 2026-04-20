@@ -24,10 +24,12 @@ class SourcePriorityReranker:
         for sc in chunks:
             tier = trust_tier_for(sc.chunk.source_class)
             boost = policy.boost_for_tier(tier)
-            reranked.append(ScoredChunk(
-                chunk=sc.chunk,
-                similarity_score=sc.similarity_score,
-                boosted_score=sc.similarity_score * boost,
-            ))
+            reranked.append(
+                ScoredChunk(
+                    chunk=sc.chunk,
+                    similarity_score=sc.similarity_score,
+                    boosted_score=sc.similarity_score * boost,
+                )
+            )
         reranked.sort(key=lambda s: s.effective_score, reverse=True)
         return reranked

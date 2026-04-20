@@ -46,7 +46,7 @@ class ChunkData:
     interlocutor: str | None = None
 
     # Context classification
-    context_type: str | None = None     # "argument", "definition", "example", "commentary"
+    context_type: str | None = None  # "argument", "definition", "example", "commentary"
 
     # Flexible metadata for collection-specific fields not covered above
     # e.g., {"entry_url": "...", "last_updated": "..."} for SEP

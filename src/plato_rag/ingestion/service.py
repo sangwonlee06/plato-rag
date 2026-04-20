@@ -57,8 +57,10 @@ class IngestionService:
         existing = await self._doc_repo.get_by_hash(content_hash)
         if existing is not None:
             return IngestResult(
-                document_id=existing.id, chunk_count=0,
-                skipped=True, skip_reason="Document already ingested (same hash)",
+                document_id=existing.id,
+                chunk_count=0,
+                skipped=True,
+                skip_reason="Document already ingested (same hash)",
             )
 
         metadata.raw_hash = content_hash
@@ -72,33 +74,37 @@ class IngestionService:
 
         if not raw_chunks:
             return IngestResult(
-                document_id=metadata.id, chunk_count=0,
-                skipped=True, skip_reason="No chunks produced (content too short?)",
+                document_id=metadata.id,
+                chunk_count=0,
+                skipped=True,
+                skip_reason="No chunks produced (content too short?)",
             )
 
         await self._doc_repo.create(metadata)
 
         chunks: list[ChunkData] = []
         for rc in raw_chunks:
-            chunks.append(ChunkData(
-                id=uuid.uuid4(),
-                document_id=metadata.id,
-                text=rc.text,
-                source_class=metadata.source_class,
-                collection=metadata.collection,
-                work_title=metadata.title,
-                author=metadata.author,
-                location_ref=rc.location_ref,
-                section_title=rc.section_title,
-                speaker=rc.speaker,
-                interlocutor=rc.interlocutor,
-                context_type=rc.context_type,
-                extra_metadata=rc.extra_metadata,
-                chunk_index=rc.chunk_index,
-                token_count=rc.token_count,
-                overlap_tokens=rc.overlap_tokens,
-                embedding_model=self._embedder.model_name(),
-            ))
+            chunks.append(
+                ChunkData(
+                    id=uuid.uuid4(),
+                    document_id=metadata.id,
+                    text=rc.text,
+                    source_class=metadata.source_class,
+                    collection=metadata.collection,
+                    work_title=metadata.title,
+                    author=metadata.author,
+                    location_ref=rc.location_ref,
+                    section_title=rc.section_title,
+                    speaker=rc.speaker,
+                    interlocutor=rc.interlocutor,
+                    context_type=rc.context_type,
+                    extra_metadata=rc.extra_metadata,
+                    chunk_index=rc.chunk_index,
+                    token_count=rc.token_count,
+                    overlap_tokens=rc.overlap_tokens,
+                    embedding_model=self._embedder.model_name(),
+                )
+            )
 
         texts = [c.text for c in chunks]
         embeddings = await self._embedder.embed(texts)

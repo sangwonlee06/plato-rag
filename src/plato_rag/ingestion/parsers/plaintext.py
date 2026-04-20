@@ -24,12 +24,12 @@ from plato_rag.domain.location import LocationRef, LocationSystem
 from plato_rag.protocols.ingestion import ParsedDocument, ParsedSection
 
 SECTION_PATTERN = re.compile(
-    r'\[SECTION'
+    r"\[SECTION"
     r'(?:\s+title="(?P<title>[^"]*)")?'
     r'(?:\s+location="(?P<location>[^"]*)")?'
     r'(?:\s+speaker="(?P<speaker>[^"]*)")?'
     r'(?:\s+interlocutor="(?P<interlocutor>[^"]*)")?'
-    r'\s*\]'
+    r"\s*\]"
 )
 
 # Map collection names to their location reference system
@@ -68,13 +68,15 @@ class PlaintextParser:
             if not text and not current_meta.get("title"):
                 return
             loc_raw = current_meta.get("location") or ""
-            sections.append(ParsedSection(
-                title=current_meta.get("title"),
-                text=text,
-                location_ref=_parse_location(loc_raw, metadata.collection),
-                speaker=current_meta.get("speaker"),
-                interlocutor=current_meta.get("interlocutor"),
-            ))
+            sections.append(
+                ParsedSection(
+                    title=current_meta.get("title"),
+                    text=text,
+                    location_ref=_parse_location(loc_raw, metadata.collection),
+                    speaker=current_meta.get("speaker"),
+                    interlocutor=current_meta.get("interlocutor"),
+                )
+            )
 
         for line in raw_content.splitlines():
             match = SECTION_PATTERN.match(line.strip())
@@ -94,11 +96,13 @@ class PlaintextParser:
 
         # If no sections were found, treat entire content as one section
         if not sections:
-            sections.append(ParsedSection(
-                title=metadata.title,
-                text=raw_content.strip(),
-                location_ref=None,
-            ))
+            sections.append(
+                ParsedSection(
+                    title=metadata.title,
+                    text=raw_content.strip(),
+                    location_ref=None,
+                )
+            )
 
         return ParsedDocument(
             metadata=metadata,

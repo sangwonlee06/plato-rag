@@ -6,7 +6,7 @@ from plato_rag.domain.document import DocumentMetadata
 from plato_rag.domain.location import LocationSystem
 from plato_rag.domain.source import SourceClass
 from plato_rag.ingestion.chunkers.section import SectionChunker
-from plato_rag.ingestion.parsers.sep_html import SepHtmlParser
+from plato_rag.local_only.sep_html import SepHtmlParser
 from plato_rag.protocols.ingestion import ChunkConfig
 
 SEP_HTML = """

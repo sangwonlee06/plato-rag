@@ -7,7 +7,7 @@ from typing import Protocol
 from uuid import UUID
 
 from plato_rag.domain.chunk import ChunkData
-from plato_rag.domain.source import SourceClass
+from plato_rag.domain.source import SourceClass, SourceExposure
 
 
 @dataclass(frozen=True)
@@ -26,6 +26,8 @@ class ExtractedCitation:
     matched_chunk_id: UUID | None = None
     is_grounded: bool = False
     source_class: SourceClass | None = None
+    collection: str | None = None
+    source_exposure: SourceExposure | None = None
     author: str | None = None
     access_url: str | None = None
     translation: str | None = None
@@ -38,5 +40,7 @@ class LLM(Protocol):
 
 class CitationExtractor(Protocol):
     def extract(
-        self, generated_text: str, retrieved_chunks: list[ChunkData],
+        self,
+        generated_text: str,
+        retrieved_chunks: list[ChunkData],
     ) -> list[ExtractedCitation]: ...

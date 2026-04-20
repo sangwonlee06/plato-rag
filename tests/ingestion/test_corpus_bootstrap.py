@@ -114,12 +114,15 @@ def fake_bootstrap_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
 async def _run_bootstrap(
     manifest_path: Path,
     state: _BootstrapState,
+    *,
+    allow_local_only_collections: bool = False,
 ) -> object:
     session = _FakeSession(state)
     return await ensure_seed_corpus(
         session,
         embedder=object(),
         manifest_path=manifest_path,
+        allow_local_only_collections=allow_local_only_collections,
         chunk_config=ChunkConfig(),
         advisory_lock_id=42,
         http_timeout_seconds=1.0,
@@ -201,3 +204,57 @@ async def test_bootstrap_fails_when_manifest_entry_cannot_produce_chunks(
 
     with pytest.raises(CorpusBootstrapError, match="could not be ingested"):
         await _run_bootstrap(manifest_path, _BootstrapState())
+
+
+@pytest.mark.asyncio
+async def test_bootstrap_rejects_local_only_collections_by_default(
+    tmp_path: Path,
+    fake_bootstrap_dependencies: None,
+) -> None:
+    manifest_path = _write_manifest(
+        tmp_path,
+        [
+            {
+                "id": "sep-entry",
+                "kind": "sep_html_file",
+                "collection": "sep",
+                "title": "SEP Entry",
+                "author": "Example Author",
+                "input_path": "sep.html",
+            },
+        ],
+    )
+    (tmp_path / "sep.html").write_text("<html></html>", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="local-only"):
+        await _run_bootstrap(manifest_path, _BootstrapState())
+
+
+@pytest.mark.asyncio
+async def test_bootstrap_allows_local_only_collections_when_explicitly_enabled(
+    tmp_path: Path,
+    fake_bootstrap_dependencies: None,
+) -> None:
+    manifest_path = _write_manifest(
+        tmp_path,
+        [
+            {
+                "id": "sep-entry",
+                "kind": "sep_html_file",
+                "collection": "sep",
+                "title": "SEP Entry",
+                "author": "Example Author",
+                "input_path": "sep.html",
+            },
+        ],
+    )
+    (tmp_path / "sep.html").write_text("local-only sep content", encoding="utf-8")
+
+    result = await _run_bootstrap(
+        manifest_path,
+        _BootstrapState(),
+        allow_local_only_collections=True,
+    )
+
+    assert result.status == "bootstrapped"
+    assert result.ingested_entries == 1

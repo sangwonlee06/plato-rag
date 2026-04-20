@@ -82,21 +82,23 @@ class SectionChunker:
         if token_count <= config.max_chunk_tokens:
             if token_count < config.min_chunk_tokens:
                 return []
-            return [RawChunk(
-                text=text,
-                location_ref=section.location_ref,
-                section_title=section.title,
-                speaker=section.speaker,
-                interlocutor=section.interlocutor,
-                extra_metadata=extra_metadata,
-                chunk_index=start_index,
-                token_count=token_count,
-            )]
+            return [
+                RawChunk(
+                    text=text,
+                    location_ref=section.location_ref,
+                    section_title=section.title,
+                    speaker=section.speaker,
+                    interlocutor=section.interlocutor,
+                    extra_metadata=extra_metadata,
+                    chunk_index=start_index,
+                    token_count=token_count,
+                )
+            ]
 
         # Split oversized sections at paragraph boundaries
         paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
         if len(paragraphs) <= 1:
-            paragraphs = re.split(r'(?<=[.!?])\s+', text)
+            paragraphs = re.split(r"(?<=[.!?])\s+", text)
             paragraphs = [s for s in paragraphs if s.strip()]
 
         chunks: list[RawChunk] = []
@@ -107,7 +109,27 @@ class SectionChunker:
         for para in paragraphs:
             para_tokens = len(self._enc.encode(para))
             if current_tokens + para_tokens > config.max_chunk_tokens and current_lines:
-                chunks.append(RawChunk(
+                chunks.append(
+                    RawChunk(
+                        text="\n\n".join(current_lines),
+                        location_ref=section.location_ref,
+                        section_title=section.title,
+                        speaker=section.speaker,
+                        interlocutor=section.interlocutor,
+                        extra_metadata=extra_metadata,
+                        chunk_index=idx,
+                        token_count=current_tokens,
+                    )
+                )
+                idx += 1
+                current_lines = []
+                current_tokens = 0
+            current_lines.append(para)
+            current_tokens += para_tokens
+
+        if current_lines and current_tokens >= config.min_chunk_tokens:
+            chunks.append(
+                RawChunk(
                     text="\n\n".join(current_lines),
                     location_ref=section.location_ref,
                     section_title=section.title,
@@ -116,23 +138,7 @@ class SectionChunker:
                     extra_metadata=extra_metadata,
                     chunk_index=idx,
                     token_count=current_tokens,
-                ))
-                idx += 1
-                current_lines = []
-                current_tokens = 0
-            current_lines.append(para)
-            current_tokens += para_tokens
-
-        if current_lines and current_tokens >= config.min_chunk_tokens:
-            chunks.append(RawChunk(
-                text="\n\n".join(current_lines),
-                location_ref=section.location_ref,
-                section_title=section.title,
-                speaker=section.speaker,
-                interlocutor=section.interlocutor,
-                extra_metadata=extra_metadata,
-                chunk_index=idx,
-                token_count=current_tokens,
-            ))
+                )
+            )
 
         return chunks

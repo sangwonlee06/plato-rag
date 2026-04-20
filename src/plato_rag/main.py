@@ -13,6 +13,7 @@ from plato_rag.config import Settings
 from plato_rag.db.engine import create_engine, create_session_factory, dispose_engine
 from plato_rag.generation.llm.anthropic import AnthropicLLM
 from plato_rag.generation.service import GenerationService
+from plato_rag.guardrails.source_access import validate_source_access_settings
 from plato_rag.ingestion.corpus import ensure_seed_corpus
 from plato_rag.ingestion.embedders.openai import OpenAIEmbedder
 from plato_rag.protocols.ingestion import ChunkConfig
@@ -24,6 +25,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     settings = Settings()
     logging.basicConfig(level=getattr(logging, settings.log_level.upper(), logging.INFO))
+    validate_source_access_settings(settings)
 
     engine = create_engine(settings.database_url)
     try:
@@ -38,30 +40,58 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
             dimensions=settings.embedding_dimensions,
         )
         if settings.bootstrap_enabled:
-            async with app.state.session_factory() as session:
-                bootstrap_result = await ensure_seed_corpus(
-                    session,
-                    embedder=app.state.embedder,
-                    manifest_path=settings.bootstrap_manifest_path,
-                    chunk_config=ChunkConfig(
-                        max_chunk_tokens=settings.bootstrap_max_chunk_tokens,
-                        min_chunk_tokens=settings.bootstrap_min_chunk_tokens,
-                        overlap_tokens=settings.bootstrap_overlap_tokens,
-                    ),
-                    advisory_lock_id=settings.bootstrap_lock_id,
-                    http_timeout_seconds=settings.bootstrap_http_timeout_seconds,
-                )
-            app.state.bootstrap_result = bootstrap_result
-            logger.info(
-                "Corpus bootstrap %s: existing=%d attempted=%d ingested=%d linked=%d chunks=%d->%d",
-                bootstrap_result.status,
-                bootstrap_result.existing_entries,
-                bootstrap_result.attempted_entries,
-                bootstrap_result.ingested_entries,
-                bootstrap_result.linked_entries,
-                bootstrap_result.total_chunks_before,
-                bootstrap_result.total_chunks_after,
+            chunk_config = ChunkConfig(
+                max_chunk_tokens=settings.bootstrap_max_chunk_tokens,
+                min_chunk_tokens=settings.bootstrap_min_chunk_tokens,
+                overlap_tokens=settings.bootstrap_overlap_tokens,
             )
+            async with app.state.session_factory() as session:
+                bootstrap_results = [
+                    (
+                        "public",
+                        await ensure_seed_corpus(
+                            session,
+                            embedder=app.state.embedder,
+                            manifest_path=settings.bootstrap_manifest_path,
+                            allow_local_only_collections=False,
+                            chunk_config=chunk_config,
+                            advisory_lock_id=settings.bootstrap_lock_id,
+                            http_timeout_seconds=settings.bootstrap_http_timeout_seconds,
+                        ),
+                    ),
+                ]
+                if settings.enable_local_only_sep:
+                    bootstrap_results.append(
+                        (
+                            "local_only_sep",
+                            await ensure_seed_corpus(
+                                session,
+                                embedder=app.state.embedder,
+                                manifest_path=settings.local_only_manifest_path,
+                                allow_local_only_collections=True,
+                                chunk_config=chunk_config,
+                                advisory_lock_id=settings.bootstrap_lock_id,
+                                http_timeout_seconds=settings.bootstrap_http_timeout_seconds,
+                            ),
+                        )
+                    )
+            app.state.bootstrap_results = bootstrap_results
+            for bootstrap_name, bootstrap_result in bootstrap_results:
+                logger.info(
+                    (
+                        "Corpus bootstrap [%s] %s: existing=%d attempted=%d "
+                        "ingested=%d linked=%d chunks=%d->%d"
+                    ),
+                    bootstrap_name,
+                    bootstrap_result.status,
+                    bootstrap_result.existing_entries,
+                    bootstrap_result.attempted_entries,
+                    bootstrap_result.ingested_entries,
+                    bootstrap_result.linked_entries,
+                    bootstrap_result.total_chunks_before,
+                    bootstrap_result.total_chunks_after,
+                )
+            app.state.bootstrap_result = bootstrap_results[0][1]
         llm = AnthropicLLM(
             api_key=settings.anthropic_api_key,
             model=settings.generation_model,
@@ -77,8 +107,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
 app = FastAPI(
     title="Plato RAG Service",
     description=(
-        "Philosophy RAG with source-priority retrieval. "
-        "Early-stage — see README for status."
+        "Philosophy RAG with source-priority retrieval. Early-stage — see README for status."
     ),
     version="0.1.0",
     lifespan=lifespan,

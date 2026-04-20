@@ -62,9 +62,7 @@ class ChunkRepository:
         stmt = select(ChunkModel, similarity).order_by(distance).limit(limit)
 
         if source_classes:
-            stmt = stmt.where(
-                ChunkModel.source_class.in_([sc.value for sc in source_classes])
-            )
+            stmt = stmt.where(ChunkModel.source_class.in_([sc.value for sc in source_classes]))
         if collections:
             stmt = stmt.where(ChunkModel.collection.in_(collections))
 
@@ -113,9 +111,7 @@ class ChunkRepository:
             interlocutor=model.interlocutor,
             context_type=model.context_type,
             extra_metadata=(
-                cast(dict[str, str], model.extra_metadata)
-                if model.extra_metadata
-                else None
+                cast(dict[str, str], model.extra_metadata) if model.extra_metadata else None
             ),
             chunk_index=model.chunk_index,
             token_count=model.token_count,
