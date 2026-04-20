@@ -30,7 +30,7 @@ What works:
 - public-safe seed corpus bootstrap
 - manifest-driven Perseus TEI ingestion for Plato and Aristotle primary texts
 - public IEP ingestion path with HTML parsing and URL-backed bootstrap
-- default public-safe seed corpus spans ancient, early modern, analytic, continental, political, Chinese, and Buddhist philosophy
+- default public-safe seed corpus spans ancient, medieval, Islamic, Jewish, early modern, analytic, continental, political, Chinese, Buddhist, and African philosophy
 - local-only SEP ingestion path with deployment guardrails
 - PostgreSQL + pgvector storage
 - OpenAI embeddings
@@ -38,7 +38,7 @@ What works:
 - Citation extraction with post-generation verification
 - Health and source-metadata endpoints
 - public container builds exclude local-only SEP code via `.dockerignore`
-- 64 passing pytest tests
+- 66 passing pytest tests
 
 What is still rough:
 
@@ -52,7 +52,7 @@ The chatbot repo has multiple answer modes. Plato mode is now handled here. That
 
 The service is philosophy-oriented, not literally limited to Plato. The name comes from the product mode, not from a hard subject boundary.
 
-The default public corpus is intentionally broader than Plato or ancient Greek philosophy. Plato remains an important primary-text layer, but the public-safe reference layer is meant to support academic philosophy more generally.
+The default public corpus is intentionally broader than Plato or ancient Greek philosophy. Plato remains an important primary-text layer, but the public-safe reference layer is meant to support academic philosophy more generally across major traditions and periods.
 
 ## API
 

@@ -236,6 +236,39 @@
       "source_url": "https://iep.utm.edu/spinoza/"
     },
     {
+      "id": "berkeley-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "George Berkeley (1685—1753)",
+      "author": "Daniel E. Flage",
+      "tradition": "modern",
+      "period": "early_modern",
+      "topics": ["berkeley", "idealism", "perception", "empiricism"],
+      "source_url": "https://iep.utm.edu/george-berkeley-british-empiricist/"
+    },
+    {
+      "id": "leibniz-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Gottfried Wilhelm Leibniz (1646-1716)",
+      "author": "Edward W. Glowienka",
+      "tradition": "modern",
+      "period": "early_modern",
+      "topics": ["leibniz", "metaphysics", "logic", "rationalism"],
+      "source_url": "https://iep.utm.edu/leib-ove/"
+    },
+    {
+      "id": "kant-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Immanuel Kant",
+      "author": "Tim Jankowiak",
+      "tradition": "modern",
+      "period": "18th_century",
+      "topics": ["kant", "epistemology", "metaphysics", "ethics"],
+      "source_url": "https://iep.utm.edu/kantview/"
+    },
+    {
       "id": "mill-iep",
       "kind": "iep_url",
       "collection": "iep",
@@ -256,6 +289,17 @@
       "period": "19th_20th_century",
       "topics": ["frege", "logic", "philosophy of language", "analytic philosophy"],
       "source_url": "https://iep.utm.edu/frege/"
+    },
+    {
+      "id": "nietzsche-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Friedrich Nietzsche (1844—1900)",
+      "author": "Dale Wilkerson",
+      "tradition": "continental",
+      "period": "19th_century",
+      "topics": ["nietzsche", "genealogy", "morality", "nihilism"],
+      "source_url": "https://iep.utm.edu/nietzsch/"
     },
     {
       "id": "wittgenstein-iep",
@@ -280,6 +324,28 @@
       "source_url": "https://iep.utm.edu/rawls/"
     },
     {
+      "id": "heidegger-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Martin Heidegger (1889—1976)",
+      "author": "W. J. Korab-Karpowicz",
+      "tradition": "continental",
+      "period": "20th_century",
+      "topics": ["heidegger", "being", "phenomenology", "existentialism"],
+      "source_url": "https://iep.utm.edu/heidegge/"
+    },
+    {
+      "id": "husserl-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Edmund Husserl (1859—1938)",
+      "author": "Marianne Sawicki",
+      "tradition": "continental",
+      "period": "20th_century",
+      "topics": ["husserl", "phenomenology", "intentionality", "consciousness"],
+      "source_url": "https://iep.utm.edu/husserl/"
+    },
+    {
       "id": "simone-de-beauvoir-iep",
       "kind": "iep_url",
       "collection": "iep",
@@ -291,6 +357,39 @@
       "source_url": "https://iep.utm.edu/simone-de-beauvoir/"
     },
     {
+      "id": "thomas-aquinas-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Thomas Aquinas (1224/6—1274)",
+      "author": "Christopher M. Brown",
+      "tradition": "medieval",
+      "period": "medieval",
+      "topics": ["aquinas", "natural law", "metaphysics", "theology"],
+      "source_url": "https://iep.utm.edu/thomas-aquinas/"
+    },
+    {
+      "id": "avicenna-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Avicenna (Ibn Sina) (c. 980—1037)",
+      "author": "Sajjad H. Rizvi",
+      "tradition": "islamic",
+      "period": "medieval",
+      "topics": ["avicenna", "metaphysics", "logic", "islamic philosophy"],
+      "source_url": "https://iep.utm.edu/avicenna-ibn-sina/"
+    },
+    {
+      "id": "maimonides-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Maimonides (1138—1204)",
+      "author": "Jonathan Jacobs",
+      "tradition": "jewish",
+      "period": "medieval",
+      "topics": ["maimonides", "negative theology", "law", "jewish philosophy"],
+      "source_url": "https://iep.utm.edu/maimonid/"
+    },
+    {
       "id": "confucius-iep",
       "kind": "iep_url",
       "collection": "iep",
@@ -300,6 +399,50 @@
       "period": "classical_chinese",
       "topics": ["confucius", "virtue", "ritual", "chinese philosophy"],
       "source_url": "https://iep.utm.edu/confucius/"
+    },
+    {
+      "id": "mencius-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Mencius (c. 372—289 B.C.E.)",
+      "author": "Jeffrey Richey",
+      "tradition": "chinese",
+      "period": "classical_chinese",
+      "topics": ["mencius", "virtue", "human nature", "confucianism"],
+      "source_url": "https://iep.utm.edu/mencius/"
+    },
+    {
+      "id": "xunzi-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Xunzi (Hsün Tzu, c. 310—c. 220 B.C.E.)",
+      "author": "David Elstein",
+      "tradition": "chinese",
+      "period": "classical_chinese",
+      "topics": ["xunzi", "ritual", "human nature", "confucianism"],
+      "source_url": "https://iep.utm.edu/xunzi/"
+    },
+    {
+      "id": "mozi-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Mozi (Mo-tzu, c. 400s—300s B.C.E.)",
+      "author": "Hui-chieh Loy",
+      "tradition": "chinese",
+      "period": "classical_chinese",
+      "topics": ["mozi", "impartial care", "consequentialism", "chinese philosophy"],
+      "source_url": "https://iep.utm.edu/mozi/"
+    },
+    {
+      "id": "zhuangzi-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Zhuangzi (Chuang-Tzu, 369—298 B.C.E.)",
+      "author": "Steve Coutinho",
+      "tradition": "chinese",
+      "period": "classical_chinese",
+      "topics": ["zhuangzi", "daoism", "skepticism", "spontaneity"],
+      "source_url": "https://iep.utm.edu/zhuangzi-chuang-tzu-chinese-philosopher/"
     },
     {
       "id": "buddha-iep",
@@ -322,6 +465,22 @@
       "period": "classical_indian",
       "topics": ["nagarjuna", "emptiness", "madhyamaka", "buddhist philosophy"],
       "source_url": "https://iep.utm.edu/nagarjun/"
+    },
+    {
+      "id": "history-of-african-philosophy-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "History of African Philosophy",
+      "author": "Jonathan O. Chimakonam",
+      "tradition": "african",
+      "period": "ancient_to_contemporary",
+      "topics": [
+        "african philosophy",
+        "ethnophilosophy",
+        "sage philosophy",
+        "postcolonial thought"
+      ],
+      "source_url": "https://iep.utm.edu/history-of-african-philosophy/"
     }
   ]
 }

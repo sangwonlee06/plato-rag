@@ -193,7 +193,9 @@ PLATO_RAG_EMBEDDING_DIMENSIONS=3072
 The primary-text layer is no longer Plato-only: Aristotle now uses the same
 remote Perseus ingestion workflow with Bekker-preserving parsing. The broader
 reference layer remains intentionally cross-tradition through the default IEP
-seed.
+seed, which now includes stronger medieval, Islamic, Jewish, Chinese, and
+African coverage in addition to the existing ancient, modern, analytic,
+continental, political, and Buddhist entries.
 
 The sample prepared files cover philosophically key passages but not the full
 text. Full-text ingestion outside the Perseus TEI path still requires manual
