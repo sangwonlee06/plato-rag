@@ -49,10 +49,10 @@ collections:
     source_class: reference_encyclopedia
     parser: html
     chunker: section
-    status: planned
+    status: mvp
     notes: >
-      HTML parser not yet implemented. Section structure is authoritative.
-      Respect SEP terms of use.
+      HTML parser implemented. Preserve numbered section structure,
+      entry metadata, revision dates, and respect SEP terms of use.
 
   iep:
     source_class: reference_encyclopedia

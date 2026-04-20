@@ -55,6 +55,9 @@ def _parse_location(raw: str, collection: str) -> LocationRef | None:
 class PlaintextParser:
     """Parses prepared plaintext files with [SECTION] markers."""
 
+    def parser_version(self) -> str:
+        return "plaintext:1.0"
+
     def parse(self, raw_content: str, metadata: DocumentMetadata) -> ParsedDocument:
         sections: list[ParsedSection] = []
         current_text_lines: list[str] = []

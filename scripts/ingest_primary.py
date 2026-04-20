@@ -5,7 +5,7 @@ Requires the package to be installed (pip install -e ".[dev]").
 
 Usage:
     python scripts/ingest_primary.py \
-        --file data/prepared/meno.txt \
+        --file data/prepared/primary/meno.txt \
         --title "Meno" \
         --author "Plato" \
         --collection platonic_dialogues \
@@ -84,7 +84,12 @@ async def main() -> None:
     if result.skipped:
         logger.info("Skipped: %s", result.skip_reason)
     else:
-        logger.info("Ingested '%s': %d chunks (document %s)", args.title, result.chunk_count, result.document_id)
+        logger.info(
+            "Ingested '%s': %d chunks (document %s)",
+            args.title,
+            result.chunk_count,
+            result.document_id,
+        )
 
 
 if __name__ == "__main__":

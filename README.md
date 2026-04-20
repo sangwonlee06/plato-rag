@@ -58,21 +58,24 @@ The bias toward narrower, more trustworthy grounding over broader but weaker gro
 - Source-priority reranker with trust-tier boosting
 - Plaintext parser for prepared primary texts with `[SECTION]` markers
 - Section-aware chunker that respects section boundaries and preserves location references
+- SEP HTML parser that preserves entry metadata, numbered sections, and revision dates
 - OpenAI embedding integration (`text-embedding-3-large`)
 - pgvector similarity search with metadata filtering
 - Retrieval service with staged search, quota enforcement, and grounding assessment
 - Anthropic Claude integration for answer generation
 - Citation extraction that verifies references against retrieved chunks
+- Manifest-driven corpus ingestion for prepared primary texts and live SEP entry URLs
+- Seed corpus assets for five Platonic dialogue texts plus a curated SEP entry manifest
 - PostgreSQL schema with Alembic migrations
-- 36 passing unit tests covering domain models, retrieval policy, reranker, and contracts
+- Unit tests covering domain models, retrieval policy, API contracts, and ingestion parsers
 
 **What is prototype-level:**
 
 - **Citation extractor** — regex-based, handles `[Work Location]` and `[Author, SEP §Section]` formats only. No fuzzy matching, no range resolution, known substring false-positive risk. See the module docstring in `generation/citation_extractor.py` for the full limitations list.
 - **Philosophy prompts** — single system prompt. Needs per-question-type prompt selection and iterative refinement.
-- **HTML parser for SEP/IEP** — not yet implemented. SEP entries require a parser that preserves section structure, entry metadata, and revision dates.
+- **IEP HTML parser** — not yet implemented. SEP is supported; IEP still needs its own parser and ingestion path.
 - **Evaluation** — no automated evaluation suite. The system cannot yet measure citation fidelity or retrieval coverage against ground truth.
-- **Corpus** — empty. The service needs prepared texts to produce useful answers.
+- **Corpus runtime state** — the repository now includes prepared seed assets, but a fresh database is still empty until you run ingestion.
 - **Error handling** — basic. No retry logic for external API calls, no structured error responses.
 
 ## Architecture
@@ -201,7 +204,7 @@ All variables are prefixed `PLATO_RAG_`. See `.env.example` for the full list. T
 ### Running tests
 
 ```bash
-pytest -v                     # All 36 tests
+pytest -v                     # All 38 tests
 pytest tests/domain/          # Domain model and location reference tests
 pytest tests/retrieval/       # Retrieval policy and reranker tests
 pytest tests/api/             # API contract serialization tests
@@ -210,12 +213,12 @@ pytest tests/api/             # API contract serialization tests
 ### Linting
 
 ```bash
-ruff check src/ tests/
+ruff check src tests scripts
 ```
 
 ## Ingesting texts
 
-The service ships with an empty corpus. To produce useful answers, you need to ingest prepared text files.
+The repository now includes a seed corpus manifest at `data/corpus_seed.json`, five prepared Platonic dialogue files under `data/prepared/primary/`, and a curated set of SEP entry URLs. A fresh database still starts empty; you need to run ingestion to load the seed corpus.
 
 Primary texts use a `[SECTION]` marker format that preserves the metadata needed for academic citation:
 
@@ -232,15 +235,22 @@ is a square?
 
 This format is a deliberate design choice. Rather than trying to parse arbitrary PDFs, the system requires a lightweight preparation step where human editorial judgment identifies section boundaries, location references (Stephanus numbers, Bekker numbers, etc.), and speaker attribution. This preparation is where source fidelity enters the pipeline.
 
-To ingest a prepared file:
+To ingest one prepared file:
 
 ```bash
 python scripts/ingest_primary.py \
-  --file data/prepared/meno.txt \
+  --file data/prepared/primary/meno.txt \
   --title "Meno" \
   --author "Plato" \
   --collection platonic_dialogues \
-  --translation "G.M.A. Grube"
+  --translation "W.R.M. Lamb"
+```
+
+To validate or ingest the full seed corpus manifest:
+
+```bash
+python scripts/ingest_corpus.py --dry-run
+python scripts/ingest_corpus.py
 ```
 
 ## Scope and design boundaries

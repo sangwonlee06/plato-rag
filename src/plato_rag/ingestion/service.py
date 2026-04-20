@@ -60,7 +60,7 @@ class IngestionService:
             )
 
         metadata.raw_hash = content_hash
-        metadata.parser_version = "plaintext:1.0"
+        metadata.parser_version = self._parser.parser_version()
 
         parsed = self._parser.parse(raw_content, metadata)
         logger.info("Parsed %d sections from '%s'", len(parsed.sections), metadata.title)
@@ -91,6 +91,7 @@ class IngestionService:
                 speaker=rc.speaker,
                 interlocutor=rc.interlocutor,
                 context_type=rc.context_type,
+                extra_metadata=rc.extra_metadata,
                 chunk_index=rc.chunk_index,
                 token_count=rc.token_count,
                 overlap_tokens=rc.overlap_tokens,

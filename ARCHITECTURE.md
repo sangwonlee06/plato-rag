@@ -41,7 +41,8 @@ src/plato_rag/
 ├── ingestion/
 │   ├── service.py      IngestionService: parse → chunk → embed → store
 │   ├── parsers/
-│   │   └── plaintext.py  [SECTION]-marker format for primary texts
+│   │   ├── plaintext.py  [SECTION]-marker format for primary texts
+│   │   └── sep_html.py   SEP entry HTML parser with numbered sections
 │   ├── chunkers/
 │   │   └── section.py    Section-aware splitting with location preservation
 │   └── embedders/
@@ -104,8 +105,8 @@ Request
 ### Ingestion (CLI script)
 
 ```
-Prepared text file
-  → parse (PlaintextParser: extract sections, location refs, speakers)
+Prepared text file or SEP HTML
+  → parse (PlaintextParser or SepHtmlParser: extract sections, location refs, speakers/entry metadata)
   → chunk (SectionChunker: split at section boundaries, respect token limits)
   → embed (OpenAI: batch embed all chunks)
   → store (PostgreSQL: document metadata + chunks with embeddings)

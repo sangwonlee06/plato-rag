@@ -1,0 +1,147 @@
+{
+  "version": "1.0",
+  "entries": [
+    {
+      "id": "meno",
+      "kind": "prepared_text",
+      "collection": "platonic_dialogues",
+      "title": "Meno",
+      "author": "Plato",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "W.R.M. Lamb",
+      "topics": ["virtue", "recollection", "inquiry", "knowledge"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0178",
+      "input_path": "prepared/primary/meno.txt"
+    },
+    {
+      "id": "apology",
+      "kind": "prepared_text",
+      "collection": "platonic_dialogues",
+      "title": "Apology",
+      "author": "Plato",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "Harold North Fowler",
+      "topics": ["socrates", "piety", "justice", "virtue"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0170",
+      "input_path": "prepared/primary/apology.txt"
+    },
+    {
+      "id": "phaedo",
+      "kind": "prepared_text",
+      "collection": "platonic_dialogues",
+      "title": "Phaedo",
+      "author": "Plato",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "Harold North Fowler",
+      "topics": ["soul", "immortality", "forms", "recollection"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0170",
+      "input_path": "prepared/primary/phaedo.txt"
+    },
+    {
+      "id": "symposium",
+      "kind": "prepared_text",
+      "collection": "platonic_dialogues",
+      "title": "Symposium",
+      "author": "Plato",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "Harold N. Fowler",
+      "topics": ["eros", "beauty", "desire", "dialectic"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0174",
+      "input_path": "prepared/primary/symposium.txt"
+    },
+    {
+      "id": "republic-vii",
+      "kind": "prepared_text",
+      "collection": "platonic_dialogues",
+      "title": "Republic Book VII",
+      "author": "Plato",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "Paul Shorey",
+      "topics": ["education", "cave", "forms", "philosopher-kings"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0168",
+      "input_path": "prepared/primary/republic_book_7.txt"
+    },
+    {
+      "id": "plato-metaphysics",
+      "kind": "sep_url",
+      "collection": "sep",
+      "title": "Plato's Middle Period Metaphysics and Epistemology",
+      "author": "Allan Silverman",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "topics": ["forms", "recollection", "epistemology", "metaphysics"],
+      "source_url": "https://plato.stanford.edu/entries/plato-metaphysics/"
+    },
+    {
+      "id": "plato-ethics-politics",
+      "kind": "sep_url",
+      "collection": "sep",
+      "title": "Plato's Ethics and Politics in The Republic",
+      "author": "Eric Brown",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "topics": ["justice", "politics", "republic", "ethics"],
+      "source_url": "https://plato.stanford.edu/entries/plato-ethics-politics/"
+    },
+    {
+      "id": "socrates-sep",
+      "kind": "sep_url",
+      "collection": "sep",
+      "title": "Socrates",
+      "author": "Debra Nails",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "topics": ["socrates", "ethics", "method", "dialogues"],
+      "source_url": "https://plato.stanford.edu/entries/socrates/"
+    },
+    {
+      "id": "ancient-soul",
+      "kind": "sep_url",
+      "collection": "sep",
+      "title": "Ancient Theories of Soul",
+      "author": "Hendrik Lorenz",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "topics": ["soul", "psychology", "immortality", "phaedo"],
+      "source_url": "https://plato.stanford.edu/entries/ancient-soul/"
+    },
+    {
+      "id": "plato-rhetoric",
+      "kind": "sep_url",
+      "collection": "sep",
+      "title": "Plato on Rhetoric and Poetry",
+      "author": "Charles L. Griswold",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "topics": ["rhetoric", "poetry", "republic", "symposium"],
+      "source_url": "https://plato.stanford.edu/entries/plato-rhetoric/"
+    },
+    {
+      "id": "plato-aesthetics",
+      "kind": "sep_url",
+      "collection": "sep",
+      "title": "Plato's Aesthetics",
+      "author": "Nickolas Pappas",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "topics": ["beauty", "art", "eros", "symposium"],
+      "source_url": "https://plato.stanford.edu/entries/plato-aesthetics/"
+    },
+    {
+      "id": "love-sep",
+      "kind": "sep_url",
+      "collection": "sep",
+      "title": "Love",
+      "author": "Bennett Helm",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "topics": ["love", "eros", "desire", "symposium"],
+      "source_url": "https://plato.stanford.edu/entries/love/"
+    }
+  ]
+}

@@ -29,6 +29,7 @@ class ParsedDocument:
     metadata: DocumentMetadata
     sections: list[ParsedSection]
     raw_text: str
+    extra_metadata: dict[str, str] | None = None
 
 
 @dataclass(frozen=True)
@@ -51,6 +52,7 @@ class RawChunk:
     speaker: str | None = None
     interlocutor: str | None = None
     context_type: str | None = None
+    extra_metadata: dict[str, str] | None = None
     chunk_index: int = 0
     token_count: int = 0
     overlap_tokens: int | None = None
@@ -59,6 +61,7 @@ class RawChunk:
 class Parser(Protocol):
     """Parses raw source content into structured sections."""
 
+    def parser_version(self) -> str: ...
     def parse(self, raw_content: str, metadata: DocumentMetadata) -> ParsedDocument: ...
 
 

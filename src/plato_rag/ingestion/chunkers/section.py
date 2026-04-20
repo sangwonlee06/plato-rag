@@ -7,29 +7,55 @@ while preserving location reference and speaker metadata on each sub-chunk.
 
 from __future__ import annotations
 
+import logging
 import re
 
-import tiktoken
+try:
+    import tiktoken
+except ImportError:  # pragma: no cover - exercised only in minimal local environments
+    tiktoken = None
 
 from plato_rag.protocols.ingestion import ChunkConfig, ParsedDocument, ParsedSection, RawChunk
+
+logger = logging.getLogger(__name__)
+
+
+class _WhitespaceEncoder:
+    def encode(self, text: str) -> list[str]:
+        return text.split()
 
 
 class SectionChunker:
     def __init__(self) -> None:
-        self._enc = tiktoken.get_encoding("cl100k_base")
+        if tiktoken is None:
+            logger.warning(
+                "tiktoken is not installed; falling back to whitespace token counts for chunking"
+            )
+            self._enc = _WhitespaceEncoder()
+        else:
+            self._enc = tiktoken.get_encoding("cl100k_base")
 
     def chunk(self, document: ParsedDocument, config: ChunkConfig) -> list[RawChunk]:
         chunks: list[RawChunk] = []
         index = 0
         for section in document.sections:
-            section_chunks = self._chunk_section(section, config, index)
+            section_chunks = self._chunk_section(
+                section,
+                config,
+                index,
+                document.extra_metadata,
+            )
             for c in section_chunks:
                 chunks.append(c)
                 index += 1
         return chunks
 
     def _chunk_section(
-        self, section: ParsedSection, config: ChunkConfig, start_index: int
+        self,
+        section: ParsedSection,
+        config: ChunkConfig,
+        start_index: int,
+        extra_metadata: dict[str, str] | None,
     ) -> list[RawChunk]:
         text = section.text.strip()
         if not text:
@@ -46,6 +72,7 @@ class SectionChunker:
                 section_title=section.title,
                 speaker=section.speaker,
                 interlocutor=section.interlocutor,
+                extra_metadata=extra_metadata,
                 chunk_index=start_index,
                 token_count=token_count,
             )]
@@ -70,6 +97,7 @@ class SectionChunker:
                     section_title=section.title,
                     speaker=section.speaker,
                     interlocutor=section.interlocutor,
+                    extra_metadata=extra_metadata,
                     chunk_index=idx,
                     token_count=current_tokens,
                 ))
@@ -86,6 +114,7 @@ class SectionChunker:
                 section_title=section.title,
                 speaker=section.speaker,
                 interlocutor=section.interlocutor,
+                extra_metadata=extra_metadata,
                 chunk_index=idx,
                 token_count=current_tokens,
             ))

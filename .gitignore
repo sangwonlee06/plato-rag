@@ -15,3 +15,5 @@ venv/
 data/raw/
 data/prepared/*
 !data/prepared/.gitkeep
+!data/prepared/primary/
+!data/prepared/primary/*.txt
