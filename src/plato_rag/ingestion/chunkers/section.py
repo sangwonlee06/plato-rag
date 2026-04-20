@@ -9,11 +9,23 @@ from __future__ import annotations
 
 import logging
 import re
+from typing import Protocol, cast
 
+class _TokenEncoder(Protocol):
+    def encode(self, text: str) -> list[object]: ...
+
+
+class _TiktokenModule(Protocol):
+    def get_encoding(self, encoding_name: str) -> _TokenEncoder: ...
+
+
+_tiktoken: _TiktokenModule | None
 try:
-    import tiktoken
+    import tiktoken as _tiktoken_import
+
+    _tiktoken = cast(_TiktokenModule, _tiktoken_import)
 except ImportError:  # pragma: no cover - exercised only in minimal local environments
-    tiktoken = None
+    _tiktoken = None
 
 from plato_rag.protocols.ingestion import ChunkConfig, ParsedDocument, ParsedSection, RawChunk
 
@@ -21,19 +33,21 @@ logger = logging.getLogger(__name__)
 
 
 class _WhitespaceEncoder:
-    def encode(self, text: str) -> list[str]:
+    def encode(self, text: str) -> list[object]:
         return text.split()
 
 
 class SectionChunker:
     def __init__(self) -> None:
-        if tiktoken is None:
+        self._enc: _TokenEncoder
+
+        if _tiktoken is None:
             logger.warning(
                 "tiktoken is not installed; falling back to whitespace token counts for chunking"
             )
             self._enc = _WhitespaceEncoder()
         else:
-            self._enc = tiktoken.get_encoding("cl100k_base")
+            self._enc = _tiktoken.get_encoding("cl100k_base")
 
     def chunk(self, document: ParsedDocument, config: ChunkConfig) -> list[RawChunk]:
         chunks: list[RawChunk] = []
