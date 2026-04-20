@@ -51,6 +51,7 @@ The next section begins here.
 | `aristotle_corpus` | Bekker | `1094a1` |
 | `presocratic_fragments` | DK | `22B30` |
 | `sep` | Section | `2.1`, `§3` |
+| `iep` | Section | `1`, `1.a`, `§1.a` |
 
 ---
 
@@ -123,8 +124,8 @@ PLATO_RAG_EMBEDDING_DIMENSIONS=3072
 | Meno (sample) | platonic_dialogues | committed | Jowett (public domain) | 10 |
 | Republic | platonic_dialogues | planned | — | — |
 | Phaedo | platonic_dialogues | planned | — | — |
-| SEP entries | sep | planned (parser not built) | — | — |
-| IEP entries | iep | planned (parser not built) | — | — |
+| SEP entries | sep | local-only | — | — |
+| IEP entries | iep | parser implemented | live HTML bootstrap | varies by entry |
 
 The sample covers the philosophically key passages but not the full text.
 Full-text ingestion requires manual preparation (see above).

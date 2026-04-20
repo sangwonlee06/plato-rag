@@ -104,6 +104,29 @@ class _FakeIngestionService:
         return IngestResult(document_id=metadata.id, chunk_count=3)
 
 
+class _FakeHttpResponse:
+    def __init__(self, text: str) -> None:
+        self.text = text
+
+    def raise_for_status(self) -> None:
+        return None
+
+
+class _FakeHttpClient:
+    def __init__(self, text: str) -> None:
+        self._text = text
+
+    async def __aenter__(self) -> _FakeHttpClient:
+        return self
+
+    async def __aexit__(self, exc_type: object, exc: object, tb: object) -> None:
+        return None
+
+    async def get(self, url: str) -> _FakeHttpResponse:
+        del url
+        return _FakeHttpResponse(self._text)
+
+
 @pytest.fixture
 def fake_bootstrap_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("plato_rag.ingestion.corpus.DocumentRepository", _FakeDocumentRepository)
@@ -255,6 +278,36 @@ async def test_bootstrap_allows_local_only_collections_when_explicitly_enabled(
         _BootstrapState(),
         allow_local_only_collections=True,
     )
+
+    assert result.status == "bootstrapped"
+    assert result.ingested_entries == 1
+
+
+@pytest.mark.asyncio
+async def test_bootstrap_supports_public_iep_url_entries(
+    tmp_path: Path,
+    fake_bootstrap_dependencies: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    manifest_path = _write_manifest(
+        tmp_path,
+        [
+            {
+                "id": "plato-iep",
+                "kind": "iep_url",
+                "collection": "iep",
+                "title": "Plato",
+                "author": "Example Author",
+                "source_url": "https://iep.utm.edu/plato/",
+            },
+        ],
+    )
+    monkeypatch.setattr(
+        "plato_rag.ingestion.corpus.httpx.AsyncClient",
+        lambda **_: _FakeHttpClient("public iep html"),
+    )
+
+    result = await _run_bootstrap(manifest_path, _BootstrapState())
 
     assert result.status == "bootstrapped"
     assert result.ingested_entries == 1

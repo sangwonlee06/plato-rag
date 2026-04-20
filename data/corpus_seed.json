@@ -65,6 +65,17 @@
       "topics": ["education", "cave", "forms", "philosopher-kings"],
       "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0168",
       "input_path": "prepared/primary/republic_book_7.txt"
+    },
+    {
+      "id": "plato-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Plato (427-347 B.C.E.)",
+      "author": "Thomas Brickhouse and Nicholas D. Smith",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "topics": ["plato", "forms", "ethics", "epistemology", "metaphysics"],
+      "source_url": "https://iep.utm.edu/plato/"
     }
   ]
 }

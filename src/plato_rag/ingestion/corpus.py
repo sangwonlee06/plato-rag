@@ -29,6 +29,9 @@ from plato_rag.protocols.ingestion import ChunkConfig, Chunker, Parser
 
 logger = logging.getLogger(__name__)
 
+FILE_BACKED_ENTRY_KINDS = {"prepared_text", "sep_html_file", "iep_html_file"}
+URL_BACKED_ENTRY_KINDS = {"sep_url", "iep_url"}
+
 
 class CorpusBootstrapError(RuntimeError):
     """Raised when the seed corpus cannot be bootstrapped safely."""
@@ -113,11 +116,11 @@ def validate_manifest_entries(
                 f"Collection {entry.collection!r} in entry {entry.id!r} is local-only "
                 "and cannot be bootstrapped in public-safe mode"
             )
-        if entry.kind in {"prepared_text", "sep_html_file"} and entry.input_path is None:
+        if entry.kind in FILE_BACKED_ENTRY_KINDS and entry.input_path is None:
             raise ValueError(f"Entry {entry.id!r} is missing input_path")
-        if entry.kind == "sep_url" and entry.source_url is None:
+        if entry.kind in URL_BACKED_ENTRY_KINDS and entry.source_url is None:
             raise ValueError(f"Entry {entry.id!r} is missing source_url")
-        if entry.kind not in {"prepared_text", "sep_url", "sep_html_file"}:
+        if entry.kind not in FILE_BACKED_ENTRY_KINDS | URL_BACKED_ENTRY_KINDS:
             raise ValueError(f"Unsupported manifest entry kind {entry.kind!r}")
 
 
@@ -141,6 +144,10 @@ def parser_for(collection: str) -> Parser:
             ) from exc
 
         return SepHtmlParser()
+    if parser_type == "html" and collection == "iep":
+        from plato_rag.ingestion.parsers.iep_html import IepHtmlParser
+
+        return IepHtmlParser()
     raise ValueError(f"Unsupported parser for collection {collection!r}")
 
 
@@ -174,13 +181,13 @@ async def load_raw_content(
     *,
     http_client: httpx.AsyncClient | None = None,
 ) -> str:
-    if entry.kind in {"prepared_text", "sep_html_file"}:
+    if entry.kind in FILE_BACKED_ENTRY_KINDS:
         if entry.input_path is None:
             raise ValueError(f"Entry {entry.id!r} is missing input_path")
         path = manifest_dir / entry.input_path
         return path.read_text(encoding="utf-8")
 
-    if entry.kind == "sep_url":
+    if entry.kind in URL_BACKED_ENTRY_KINDS:
         if entry.source_url is None:
             raise ValueError(f"Entry {entry.id!r} is missing source_url")
         if http_client is None:

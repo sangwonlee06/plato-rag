@@ -28,6 +28,7 @@ What works:
 - Source classification with separate source classes and derived trust tiers
 - Seed corpus manifest and prepared primary-text inputs in the repo
 - public-safe seed corpus bootstrap
+- public IEP ingestion path with HTML parsing and URL-backed bootstrap
 - local-only SEP ingestion path with deployment guardrails
 - PostgreSQL + pgvector storage
 - OpenAI embeddings
@@ -35,11 +36,10 @@ What works:
 - Citation extraction with post-generation verification
 - Health and source-metadata endpoints
 - public container builds exclude local-only SEP code via `.dockerignore`
-- 52 passing pytest tests
+- 56 passing pytest tests
 
 What is still rough:
 
-- IEP parsing is not implemented yet
 - Citation extraction is regex-based and still limited
 - No proper evaluation harness yet
 - Error handling and retry behavior need more work
@@ -213,7 +213,7 @@ python scripts/ingest_primary.py \
 
 Verified locally:
 
-- `pytest -q` -> 53 passing tests
+- `pytest -q` -> 56 passing tests
 
 Common commands:
 
@@ -237,7 +237,7 @@ Plato mode in the chatbot expects this service to be available at that base URL 
 Short version:
 
 - ingest more texts
-- add IEP support
+- expand public IEP coverage beyond the initial seed entry
 - improve citation matching
 - build a real evaluation set
 - tighten operational behavior around retries and failures

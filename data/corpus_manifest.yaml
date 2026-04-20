@@ -58,4 +58,7 @@ collections:
     source_class: reference_encyclopedia
     parser: html
     chunker: section
-    status: planned
+    status: mvp
+    notes: >
+      HTML parser implemented. Preserve article title, author attribution,
+      substantive section structure, and stable entry URL.
