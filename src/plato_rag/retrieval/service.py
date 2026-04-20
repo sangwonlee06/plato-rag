@@ -88,9 +88,13 @@ class RetrievalService:
             results_returned += len(results)
 
             # Early exit: if we already have enough high-trust chunks,
-            # skip lower-priority stages
+            # skip lower-priority stages, but only after all quota-bearing
+            # source classes have actually been represented.
             high_trust_count = sum(1 for c in all_candidates if is_high_trust(c.chunk.source_class))
-            if high_trust_count >= policy.max_chunks:
+            if high_trust_count >= policy.max_chunks and self._has_minimum_quota_coverage(
+                all_candidates,
+                policy,
+            ):
                 break
 
         # Rerank with trust-tier boosts
@@ -124,6 +128,20 @@ class RetrievalService:
                 selected.append(sc)
 
         return selected[: policy.max_chunks]
+
+    def _has_minimum_quota_coverage(
+        self,
+        candidates: list[ScoredChunk],
+        policy: RetrievalPolicy,
+    ) -> bool:
+        counts: Counter[SourceClass] = Counter()
+        for scored_chunk in candidates:
+            counts[scored_chunk.chunk.source_class] += 1
+
+        for quota in policy.source_quotas:
+            if counts.get(quota.source_class, 0) < quota.min_chunks:
+                return False
+        return True
 
     def _assess_grounding(
         self,

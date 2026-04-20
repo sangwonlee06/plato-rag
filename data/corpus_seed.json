@@ -154,6 +154,138 @@
       "period": "classical_greek",
       "topics": ["ancient greek philosophy", "presocratics", "plato", "aristotle"],
       "source_url": "https://iep.utm.edu/greekphi/"
+    },
+    {
+      "id": "rene-descartes-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "René Descartes (1596—1650)",
+      "author": "Justin Skirry",
+      "tradition": "modern",
+      "period": "early_modern",
+      "topics": ["descartes", "rationalism", "mind-body", "method"],
+      "source_url": "https://iep.utm.edu/rene-descartes/"
+    },
+    {
+      "id": "hume-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "David Hume (1711—1776)",
+      "author": "James Fieser",
+      "tradition": "modern",
+      "period": "early_modern",
+      "topics": ["hume", "empiricism", "causation", "skepticism"],
+      "source_url": "https://iep.utm.edu/hume/"
+    },
+    {
+      "id": "locke-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "John Locke (1632—1704)",
+      "author": "Patrick J. Connolly",
+      "tradition": "modern",
+      "period": "early_modern",
+      "topics": ["locke", "empiricism", "political philosophy", "personal identity"],
+      "source_url": "https://iep.utm.edu/locke/"
+    },
+    {
+      "id": "spinoza-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Benedict De Spinoza (1632—1677)",
+      "author": "Blake D. Dutton",
+      "tradition": "modern",
+      "period": "early_modern",
+      "topics": ["spinoza", "substance", "ethics", "determinism"],
+      "source_url": "https://iep.utm.edu/spinoza/"
+    },
+    {
+      "id": "mill-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "John Stuart Mill (1806—1873)",
+      "author": "Colin Heydt",
+      "tradition": "modern",
+      "period": "19th_century",
+      "topics": ["mill", "utilitarianism", "liberty", "political philosophy"],
+      "source_url": "https://iep.utm.edu/milljs/"
+    },
+    {
+      "id": "frege-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Gottlob Frege (1848—1925)",
+      "author": "Kevin C. Klement",
+      "tradition": "analytic",
+      "period": "19th_20th_century",
+      "topics": ["frege", "logic", "philosophy of language", "analytic philosophy"],
+      "source_url": "https://iep.utm.edu/frege/"
+    },
+    {
+      "id": "wittgenstein-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Ludwig Wittgenstein (1889—1951)",
+      "author": "Duncan J. Richter",
+      "tradition": "analytic",
+      "period": "20th_century",
+      "topics": ["wittgenstein", "language", "meaning", "analytic philosophy"],
+      "source_url": "https://iep.utm.edu/wittgens/"
+    },
+    {
+      "id": "rawls-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "John Rawls (1921—2002)",
+      "author": "Henry S. Richardson",
+      "tradition": "political",
+      "period": "20th_century",
+      "topics": ["rawls", "justice", "liberalism", "political philosophy"],
+      "source_url": "https://iep.utm.edu/rawls/"
+    },
+    {
+      "id": "simone-de-beauvoir-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Simone de Beauvoir (1908—1986)",
+      "author": "Shannon Mussett",
+      "tradition": "continental",
+      "period": "20th_century",
+      "topics": ["de beauvoir", "existentialism", "feminism", "ethics"],
+      "source_url": "https://iep.utm.edu/simone-de-beauvoir/"
+    },
+    {
+      "id": "confucius-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Confucius (551—479 B.C.E.)",
+      "author": "Jeff Richey",
+      "tradition": "chinese",
+      "period": "classical_chinese",
+      "topics": ["confucius", "virtue", "ritual", "chinese philosophy"],
+      "source_url": "https://iep.utm.edu/confucius/"
+    },
+    {
+      "id": "buddha-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Buddha (c. 500s B.C.E.)",
+      "author": "Abraham Velez",
+      "tradition": "buddhist",
+      "period": "early_buddhist",
+      "topics": ["buddha", "buddhism", "suffering", "liberation"],
+      "source_url": "https://iep.utm.edu/buddha/"
+    },
+    {
+      "id": "nagarjuna-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Nagarjuna (c. 150—c. 250)",
+      "author": "Douglas Berger",
+      "tradition": "buddhist",
+      "period": "classical_indian",
+      "topics": ["nagarjuna", "emptiness", "madhyamaka", "buddhist philosophy"],
+      "source_url": "https://iep.utm.edu/nagarjun/"
     }
   ]
 }

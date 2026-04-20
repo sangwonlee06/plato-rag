@@ -168,8 +168,14 @@ PLATO_RAG_EMBEDDING_DIMENSIONS=3072
 | Republic | platonic_dialogues | planned | — | — |
 | Phaedo | platonic_dialogues | planned | — | — |
 | Perseus Plato texts | platonic_dialogues | supported | public-domain Perseus translations | varies by work |
+| IEP broad philosophy entries | iep | supported | live HTML bootstrap | varies by entry |
 | SEP entries | sep | local-only | — | — |
-| IEP entries | iep | supported | live HTML bootstrap | varies by entry |
 
-The sample covers the philosophically key passages but not the full text.
-Full-text ingestion requires manual preparation (see above).
+The primary-text layer is still Plato-heavy because only Plato currently has a
+remote public-domain ingestion path. The reference layer is broader by design:
+the default IEP seed now spans ancient, early modern, analytic, continental,
+political, Chinese, and Buddhist philosophy.
+
+The sample prepared files cover philosophically key passages but not the full
+text. Full-text ingestion outside the Perseus TEI path still requires manual
+preparation (see above).

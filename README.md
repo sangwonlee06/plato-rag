@@ -30,6 +30,7 @@ What works:
 - public-safe seed corpus bootstrap
 - manifest-driven Perseus TEI ingestion for Plato primary texts
 - public IEP ingestion path with HTML parsing and URL-backed bootstrap
+- default public-safe seed corpus spans ancient, early modern, analytic, continental, political, Chinese, and Buddhist philosophy
 - local-only SEP ingestion path with deployment guardrails
 - PostgreSQL + pgvector storage
 - OpenAI embeddings
@@ -37,7 +38,7 @@ What works:
 - Citation extraction with post-generation verification
 - Health and source-metadata endpoints
 - public container builds exclude local-only SEP code via `.dockerignore`
-- 60 passing pytest tests
+- 62 passing pytest tests
 
 What is still rough:
 
@@ -50,6 +51,8 @@ What is still rough:
 The chatbot repo has multiple answer modes. Plato mode is now handled here. That keeps retrieval logic, ingestion, and corpus management out of the main NestJS app.
 
 The service is philosophy-oriented, not literally limited to Plato. The name comes from the product mode, not from a hard subject boundary.
+
+The default public corpus is intentionally broader than Plato or ancient Greek philosophy. Plato remains an important primary-text layer, but the public-safe reference layer is meant to support academic philosophy more generally.
 
 ## API
 
@@ -256,6 +259,7 @@ Short version:
 
 - ingest more texts
 - expand public IEP coverage beyond the current seed set
+- add non-Platonic public-domain primary texts with citation-grade location systems
 - improve citation matching
 - build a real evaluation set
 - tighten operational behavior around retries and failures

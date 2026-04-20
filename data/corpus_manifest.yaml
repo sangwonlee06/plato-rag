@@ -11,8 +11,9 @@ version: "1.0"
 corpus_name: "plato_rag_philosophy"
 description: >
   Philosophy corpus for Plato-mode RAG service.
-  Emphasis on foundational and classical philosophy
-  with high-trust reference grounding via SEP and IEP.
+  The product mode is named Plato, but the corpus is intended to support
+  academic philosophy broadly across periods, traditions, and subfields
+  with high-trust reference grounding via IEP and local-only SEP.
 
 source_classes:
   primary_text:
@@ -63,4 +64,5 @@ collections:
     notes: >
       HTML parser implemented. Preserve article title, author attribution,
       substantive section structure, stable entry URL, and manifest-driven
-      URL bootstrap.
+      URL bootstrap. Seed entries should remain philosophically broad rather
+      than concentrating narrowly on ancient Greek philosophy.
