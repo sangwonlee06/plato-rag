@@ -123,6 +123,42 @@
       }
     },
     {
+      "id": "nicomachean-ethics",
+      "kind": "perseus_tei",
+      "collection": "aristotle_corpus",
+      "title": "Nicomachean Ethics",
+      "author": "Aristotle",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "H. Rackham",
+      "topics": ["ethics", "virtue", "eudaimonia", "practical reason"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0054"
+    },
+    {
+      "id": "politics",
+      "kind": "perseus_tei",
+      "collection": "aristotle_corpus",
+      "title": "Politics",
+      "author": "Aristotle",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "H. Rackham",
+      "topics": ["politics", "constitution", "citizenship", "household"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0058"
+    },
+    {
+      "id": "metaphysics",
+      "kind": "perseus_tei",
+      "collection": "aristotle_corpus",
+      "title": "Metaphysics",
+      "author": "Aristotle",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "Hugh Tredennick",
+      "topics": ["metaphysics", "substance", "being", "causation"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0052"
+    },
+    {
       "id": "socrates-iep",
       "kind": "iep_url",
       "collection": "iep",

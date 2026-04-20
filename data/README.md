@@ -62,7 +62,7 @@ parsed safely and reproducibly without a hand-prepared plaintext file.
 
 ### `perseus_tei`
 
-Use for public-domain Plato texts available from the Perseus `dltext` TEI
+Use for public-domain primary texts available from the Perseus `dltext` TEI
 endpoint.
 
 ```json
@@ -80,10 +80,28 @@ endpoint.
 }
 ```
 
-`source_config.text_id` must match the TEI `<text n="...">` identifier inside
-the downloaded document. The parser uses Perseus `milestone unit="section"`
-markers as Stephanus references and preserves dialogue speaker changes in the
-section text.
+If the downloaded TEI contains multiple works, `source_config.text_id` must
+match the TEI `<text n="...">` identifier for the selected work. This is
+required for Plato bundles such as `Euthydemus, Protagoras, Gorgias, Meno`.
+
+The parser currently supports two citation-preserving Perseus modes:
+
+- Platonic dialogues: Stephanus milestones plus speaker changes
+- Aristotle treatises: Bekker page/line milestones plus book/chapter structure
+
+Example Aristotle entry:
+
+```json
+{
+  "id": "nicomachean-ethics",
+  "kind": "perseus_tei",
+  "collection": "aristotle_corpus",
+  "title": "Nicomachean Ethics",
+  "author": "Aristotle",
+  "translation": "H. Rackham",
+  "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0054"
+}
+```
 
 ### `iep_url`
 
@@ -168,13 +186,14 @@ PLATO_RAG_EMBEDDING_DIMENSIONS=3072
 | Republic | platonic_dialogues | planned | — | — |
 | Phaedo | platonic_dialogues | planned | — | — |
 | Perseus Plato texts | platonic_dialogues | supported | public-domain Perseus translations | varies by work |
+| Perseus Aristotle texts | aristotle_corpus | supported | public-domain Perseus translations | varies by work |
 | IEP broad philosophy entries | iep | supported | live HTML bootstrap | varies by entry |
 | SEP entries | sep | local-only | — | — |
 
-The primary-text layer is still Plato-heavy because only Plato currently has a
-remote public-domain ingestion path. The reference layer is broader by design:
-the default IEP seed now spans ancient, early modern, analytic, continental,
-political, Chinese, and Buddhist philosophy.
+The primary-text layer is no longer Plato-only: Aristotle now uses the same
+remote Perseus ingestion workflow with Bekker-preserving parsing. The broader
+reference layer remains intentionally cross-tradition through the default IEP
+seed.
 
 The sample prepared files cover philosophically key passages but not the full
 text. Full-text ingestion outside the Perseus TEI path still requires manual

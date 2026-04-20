@@ -365,3 +365,33 @@ async def test_bootstrap_rejects_perseus_entries_without_text_identifier(
 
     with pytest.raises(ValueError, match="source_config.text_id"):
         await _run_bootstrap(manifest_path, _BootstrapState())
+
+
+@pytest.mark.asyncio
+async def test_bootstrap_allows_aristotle_perseus_entries_without_text_identifier(
+    tmp_path: Path,
+    fake_bootstrap_dependencies: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    manifest_path = _write_manifest(
+        tmp_path,
+        [
+            {
+                "id": "nicomachean-ethics",
+                "kind": "perseus_tei",
+                "collection": "aristotle_corpus",
+                "title": "Nicomachean Ethics",
+                "author": "Aristotle",
+                "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0054",
+            },
+        ],
+    )
+    monkeypatch.setattr(
+        "plato_rag.ingestion.corpus.httpx.AsyncClient",
+        lambda **_: _FakeHttpClient("aristotle perseus tei xml"),
+    )
+
+    result = await _run_bootstrap(manifest_path, _BootstrapState())
+
+    assert result.status == "bootstrapped"
+    assert result.ingested_entries == 1

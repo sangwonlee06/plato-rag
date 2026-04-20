@@ -4,7 +4,7 @@
 Supports manifest-driven workflows:
 
 - `prepared_text`: local primary-text files already in `[SECTION]` format
-- `perseus_tei`: fetch Perseus TEI XML and parse it into structured Plato sections
+- `perseus_tei`: fetch Perseus TEI XML and parse it into structured primary-text sections
 - `sep_url`: fetch SEP HTML directly from the stable entry URL and parse it
 
 Use `--dry-run` to validate parsing and chunking without touching the database

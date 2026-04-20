@@ -28,7 +28,7 @@ What works:
 - Source classification with separate source classes and derived trust tiers
 - Seed corpus manifest and prepared primary-text inputs in the repo
 - public-safe seed corpus bootstrap
-- manifest-driven Perseus TEI ingestion for Plato primary texts
+- manifest-driven Perseus TEI ingestion for Plato and Aristotle primary texts
 - public IEP ingestion path with HTML parsing and URL-backed bootstrap
 - default public-safe seed corpus spans ancient, early modern, analytic, continental, political, Chinese, and Buddhist philosophy
 - local-only SEP ingestion path with deployment guardrails
@@ -38,7 +38,7 @@ What works:
 - Citation extraction with post-generation verification
 - Health and source-metadata endpoints
 - public container builds exclude local-only SEP code via `.dockerignore`
-- 62 passing pytest tests
+- 64 passing pytest tests
 
 What is still rough:
 
@@ -205,18 +205,18 @@ python scripts/ingest_corpus.py
 The scalable path is manifest-driven:
 
 1. add a new entry to `data/corpus_seed.json`
-2. use `prepared_text` for local curated plaintext, `perseus_tei` for public-domain Plato texts from Perseus, or `iep_url` for public IEP entries
-3. for `perseus_tei`, set `source_config.text_id` to the TEI `<text n="...">` identifier
+2. use `prepared_text` for local curated plaintext, `perseus_tei` for public-domain primary texts from Perseus, or `iep_url` for public IEP entries
+3. for `perseus_tei`, set `source_config.text_id` when the TEI document contains multiple works, as Plato bundles often do
 4. validate only the new entries before embedding anything:
 
 ```bash
-python scripts/ingest_corpus.py --dry-run --only euthydemus protagoras
+python scripts/ingest_corpus.py --dry-run --only euthydemus nicomachean-ethics
 ```
 
 5. ingest just those entries once the dry-run output looks right:
 
 ```bash
-python scripts/ingest_corpus.py --only euthydemus protagoras
+python scripts/ingest_corpus.py --only euthydemus nicomachean-ethics
 ```
 
 There is also a one-off primary text ingestion script:
@@ -259,7 +259,7 @@ Short version:
 
 - ingest more texts
 - expand public IEP coverage beyond the current seed set
-- add non-Platonic public-domain primary texts with citation-grade location systems
+- add more non-Platonic public-domain primary texts with citation-grade location systems
 - improve citation matching
 - build a real evaluation set
 - tighten operational behavior around retries and failures

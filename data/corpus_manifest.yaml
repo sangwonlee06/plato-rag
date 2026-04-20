@@ -47,6 +47,15 @@ collections:
       Supports prepared text format with [SECTION] markers and
       Perseus TEI bootstrap via manifest source_config.text_id.
 
+  aristotle_corpus:
+    source_class: primary_text
+    parser: plaintext/perseus_tei
+    chunker: section
+    status: mvp
+    notes: >
+      Bekker numbering preserved. Supports prepared text format with
+      [SECTION] markers and Perseus TEI bootstrap for single-work treatises.
+
   sep:
     source_class: reference_encyclopedia
     parser: html

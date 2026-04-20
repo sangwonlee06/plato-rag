@@ -105,7 +105,8 @@ COLLECTION_REGISTRY: dict[str, SourceCollectionInfo] = {
         label="Platonic Dialogues",
         parser_type="plaintext",
         chunker_type="section",
-        notes="Stephanus numbering must be preserved. Speaker attribution required.",
+        notes="Stephanus numbering must be preserved. Speaker attribution required. "
+        "Supports prepared plaintext and Perseus TEI ingestion.",
     ),
     "presocratic_fragments": SourceCollectionInfo(
         name="presocratic_fragments",
@@ -123,7 +124,8 @@ COLLECTION_REGISTRY: dict[str, SourceCollectionInfo] = {
         label="Aristotle Corpus",
         parser_type="plaintext",
         chunker_type="section",
-        notes="Bekker numbering must be preserved.",
+        notes="Bekker numbering must be preserved. Supports prepared plaintext "
+        "and Perseus TEI ingestion.",
     ),
     # Future: descartes_meditations, hume_treatise, kant_critique, mill_liberty, etc.
     "sep": SourceCollectionInfo(

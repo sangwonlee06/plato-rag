@@ -47,6 +47,41 @@ PERSEUS_TEI = """
 </TEI.2>
 """
 
+ARISTOTLE_TEI = """
+<?xml version="1.0" encoding="utf-8"?>
+<TEI.2>
+  <teiHeader type="text" status="new">
+    <fileDesc>
+      <titleStmt>
+        <title>Nicomachean Ethics (English)</title>
+      </titleStmt>
+    </fileDesc>
+  </teiHeader>
+  <text lang="en">
+    <body>
+      <div1 n="1" type="Book">
+        <head>Book 1</head>
+        <milestone n="1094a" unit="bekker page" />
+        <milestone n="1" unit="bekker line" />
+        <milestone n="1" unit="chapter" />
+        <p>
+          Every art and every inquiry seems to aim at some good.
+          <milestone n="20" ed="Bekker" unit="line" />
+          Hence it has been said that the good is that at which all things aim.
+          <milestone n="2" unit="chapter" />
+          If there is an end of our actions that we wish for itself, this will be the good.
+        </p>
+        <p>
+          <milestone n="1094b" unit="bekker page" />
+          <milestone n="1" ed="Bekker" unit="line" />
+          Political science ordains which sciences should exist in the city.
+        </p>
+      </div1>
+    </body>
+  </text>
+</TEI.2>
+"""
+
 
 def _metadata() -> DocumentMetadata:
     return DocumentMetadata(
@@ -56,6 +91,17 @@ def _metadata() -> DocumentMetadata:
         source_class=SourceClass.PRIMARY_TEXT,
         collection="platonic_dialogues",
         source_url="https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0178",
+    )
+
+
+def _aristotle_metadata() -> DocumentMetadata:
+    return DocumentMetadata(
+        id=uuid.uuid4(),
+        title="placeholder",
+        author="Aristotle",
+        source_class=SourceClass.PRIMARY_TEXT,
+        collection="aristotle_corpus",
+        source_url="https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0054",
     )
 
 
@@ -106,3 +152,44 @@ def test_section_chunker_propagates_perseus_source_metadata() -> None:
     assert chunks[0].extra_metadata == {
         "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0178",
     }
+
+
+def test_perseus_tei_parser_preserves_bekker_ranges_for_treatises() -> None:
+    parser = PerseusTeiParser(parse_mode="bekker_treatise")
+
+    parsed = parser.parse(ARISTOTLE_TEI, _aristotle_metadata())
+
+    assert parsed.metadata.title == "Nicomachean Ethics"
+    assert parsed.extra_metadata == {
+        "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0054",
+    }
+    assert [section.title for section in parsed.sections] == [
+        "Book 1, Chapter 1",
+        "Book 1, Chapter 2",
+        "Book 1, Chapter 2",
+    ]
+
+    first_section = parsed.sections[0]
+    assert first_section.location_ref is not None
+    assert first_section.location_ref.system == LocationSystem.BEKKER
+    assert first_section.location_ref.value == "1094a1"
+    assert first_section.location_ref.range_end == "1094a20"
+    assert first_section.text == (
+        "Every art and every inquiry seems to aim at some good. "
+        "Hence it has been said that the good is that at which all things aim."
+    )
+
+    second_section = parsed.sections[1]
+    assert second_section.location_ref is not None
+    assert second_section.location_ref.value == "1094a20"
+    assert second_section.location_ref.range_end is None
+    assert second_section.text == (
+        "If there is an end of our actions that we wish for itself, this will be the good."
+    )
+
+    third_section = parsed.sections[2]
+    assert third_section.location_ref is not None
+    assert third_section.location_ref.value == "1094b1"
+    assert third_section.text == (
+        "Political science ordains which sciences should exist in the city."
+    )

@@ -124,7 +124,11 @@ def validate_manifest_entries(
             raise ValueError(f"Entry {entry.id!r} is missing source_url")
         if entry.kind not in FILE_BACKED_ENTRY_KINDS | URL_BACKED_ENTRY_KINDS:
             raise ValueError(f"Unsupported manifest entry kind {entry.kind!r}")
-        if entry.kind == "perseus_tei" and "text_id" not in entry.source_config:
+        if (
+            entry.kind == "perseus_tei"
+            and entry.collection == "platonic_dialogues"
+            and "text_id" not in entry.source_config
+        ):
             raise ValueError(
                 f"Entry {entry.id!r} is missing source_config.text_id for Perseus TEI ingestion"
             )
@@ -140,7 +144,17 @@ def parser_for(entry: CorpusEntry) -> Parser:
     if entry.kind == "perseus_tei":
         from plato_rag.ingestion.parsers.perseus_tei import PerseusTeiParser
 
-        return PerseusTeiParser(text_identifier=entry.source_config["text_id"])
+        if entry.collection == "platonic_dialogues":
+            return PerseusTeiParser(
+                text_identifier=entry.source_config.get("text_id"),
+                parse_mode="dialogue",
+            )
+        if entry.collection == "aristotle_corpus":
+            return PerseusTeiParser(
+                text_identifier=entry.source_config.get("text_id"),
+                parse_mode="bekker_treatise",
+            )
+        raise ValueError(f"Unsupported collection {entry.collection!r} for Perseus TEI ingestion")
 
     parser_type = COLLECTION_REGISTRY[entry.collection].parser_type
     if parser_type == "plaintext":
