@@ -26,22 +26,10 @@ from plato_rag.domain.philosophy_profile import (
     significant_tokens,
 )
 from plato_rag.domain.source import collection_exposure
+from plato_rag.generation.bracket_fallback import parse_bracketed_claims
 from plato_rag.protocols.generation import ExtractedCitation, StructuredClaim
 
-CITATION_PATTERN = re.compile(r"\[(?P<content>[^\]]+)\]")
-ENCYCLOPEDIA_CITATION_PATTERN = re.compile(
-    r"^(?P<author>.+?),\s*(?P<collection>SEP|IEP)\s*(?P<location>.+)$",
-    re.IGNORECASE,
-)
-COLLECTION_ONLY_CITATION_PATTERN = re.compile(
-    r"^(?P<collection>SEP|IEP)\s*(?P<location>.+)$",
-    re.IGNORECASE,
-)
 RANGE_SEPARATOR_PATTERN = re.compile(r"\s*[\u2013-]\s*")
-LOCATION_START_PATTERN = re.compile(
-    r"^(?:\u00a7|section\s+|sec\.?\s+|p(?:age)?\.?\s+|chapter\s+|chap\.?\s+|\d)",
-    re.IGNORECASE,
-)
 
 
 @dataclass(frozen=True)
@@ -61,7 +49,7 @@ class _CandidateMatch:
 
 
 class BasicCitationExtractor:
-    """Extract bracketed citations from generated text and match them conservatively."""
+    """Match structured citations, or bracket-fallback claims, to retrieved chunks."""
 
     def extract(
         self,
@@ -71,11 +59,8 @@ class BasicCitationExtractor:
         question: str | None = None,
         claims: list[StructuredClaim] | None = None,
     ) -> list[ExtractedCitation]:
-        parsed_citations = (
-            self._parse_structured_claims(claims)
-            if claims
-            else self._parse_citations(generated_text)
-        )
+        claim_set = claims if claims is not None else parse_bracketed_claims(generated_text)
+        parsed_citations = self._parse_structured_claims(claim_set)
         question_profile = profile_text(question or "")
         verified: list[ExtractedCitation] = []
 
@@ -136,103 +121,6 @@ class BasicCitationExtractor:
                     )
                 )
         return results
-
-    def _parse_citations(self, text: str) -> list[_ParsedCitation]:
-        """Extract citations from bracketed markers.
-
-        Supported shapes:
-        - ``[Meno 86b]``
-        - ``[Meno 82b-85b]``
-        - ``[Brickhouse and Smith, IEP §2]``
-        - ``[IEP §2.1]``
-        - ``[Meno 86b; Brickhouse and Smith, IEP §2]``
-        """
-        results: list[_ParsedCitation] = []
-        seen: set[str] = set()
-
-        for match in CITATION_PATTERN.finditer(text):
-            bracket_content = match.group("content").strip()
-            if not bracket_content:
-                continue
-            claim_text = _claim_text_for_span(text, match.start(), match.end())
-
-            for part in self._split_citation_group(bracket_content):
-                if part in seen:
-                    continue
-                seen.add(part)
-
-                encyclopedia_match = ENCYCLOPEDIA_CITATION_PATTERN.match(part)
-                if encyclopedia_match is not None:
-                    collection = encyclopedia_match.group("collection").lower()
-                    results.append(
-                        _ParsedCitation(
-                            raw=part,
-                            work=encyclopedia_match.group("collection").upper(),
-                            location=encyclopedia_match.group("location").strip(),
-                            collection_hint=collection,
-                            author_hint=encyclopedia_match.group("author").strip(),
-                            claim_text=claim_text,
-                        )
-                    )
-                    continue
-
-                collection_match = COLLECTION_ONLY_CITATION_PATTERN.match(part)
-                if collection_match is not None:
-                    collection = collection_match.group("collection").lower()
-                    results.append(
-                        _ParsedCitation(
-                            raw=part,
-                            work=collection_match.group("collection").upper(),
-                            location=collection_match.group("location").strip(),
-                            collection_hint=collection,
-                            claim_text=claim_text,
-                        )
-                    )
-                    continue
-
-                work_and_location = self._split_work_and_location(part)
-                if work_and_location is not None:
-                    work, location = work_and_location
-                    results.append(
-                        _ParsedCitation(
-                            raw=part,
-                            work=work,
-                            location=location,
-                            claim_text=claim_text,
-                        )
-                    )
-                    continue
-
-                results.append(_ParsedCitation(raw=part, work=part, claim_text=claim_text))
-
-        return results
-
-    def _split_citation_group(self, content: str) -> list[str]:
-        return [part.strip() for part in re.split(r"\s*;\s*", content) if part.strip()]
-
-    def _split_work_and_location(self, content: str) -> tuple[str, str] | None:
-        tokens = content.split()
-        for index in range(1, len(tokens)):
-            candidate_location = " ".join(tokens[index:])
-            if not self._looks_like_location(candidate_location):
-                continue
-            work = " ".join(tokens[:index]).strip()
-            if not work:
-                continue
-            return work, candidate_location.strip()
-        return None
-
-    def _looks_like_location(self, value: str) -> bool:
-        if not LOCATION_START_PATTERN.match(value):
-            return False
-
-        normalized = value.strip().lower()
-        normalized = normalized.replace("\u2013", "-")
-        normalized = re.sub(r"\s+", " ", normalized)
-        normalized = normalized.lstrip("\u00a7").strip()
-        normalized = re.sub(r"^(?:section|sec\.?|chapter|chap\.?)\s+", "", normalized).strip()
-        normalized = re.sub(r"^p(?:age)?\.?\s*", "", normalized).strip()
-        return bool(re.fullmatch(r"[\da-z.]+(?:\s*-\s*[\da-z.]+)?", normalized))
 
     def _match_to_chunk(
         self,
@@ -514,31 +402,6 @@ def _split_location_range(value: str) -> tuple[str | None, str | None]:
     if len(parts) == 1:
         return parts[0].strip(), None
     return parts[0].strip(), parts[1].strip()
-
-
-def _claim_text_for_span(text: str, start: int, end: int) -> str:
-    left_boundary = max(
-        text.rfind(".", 0, start),
-        text.rfind("?", 0, start),
-        text.rfind("!", 0, start),
-        text.rfind("\n", 0, start),
-    )
-    right_candidates = [
-        boundary
-        for boundary in (
-            text.find(".", end),
-            text.find("?", end),
-            text.find("!", end),
-            text.find("\n", end),
-        )
-        if boundary != -1
-    ]
-    right_boundary = min(right_candidates) if right_candidates else len(text)
-
-    sentence = text[left_boundary + 1 : right_boundary].strip()
-    sentence = CITATION_PATTERN.sub("", sentence)
-    sentence = re.sub(r"\s+", " ", sentence).strip(" ;,:")
-    return sentence
 
 
 def _is_general_philosophy_question(question_profile: PhilosophyProfile) -> bool:

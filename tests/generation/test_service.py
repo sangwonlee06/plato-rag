@@ -116,7 +116,27 @@ async def test_generation_service_uses_structured_json_claims() -> None:
 
 
 @pytest.mark.asyncio
-async def test_generation_service_falls_back_when_json_parse_fails() -> None:
+async def test_generation_service_uses_bracketed_fallback_claims_when_json_parse_fails() -> None:
+    extractor = _RecordingExtractor()
+    service = GenerationService(
+        llm=_FakeLLM(
+            "Knowledge is often analyzed as justified true belief "
+            "[David A. Truncellito, IEP §2]."
+        ),
+        extractor=extractor,
+    )
+
+    result = await service.generate("What is knowledge?", [_scored_chunk()])
+
+    assert result.answer == "Knowledge is often analyzed as justified true belief."
+    assert extractor.claims_seen is not None
+    assert extractor.claims_seen[0].claim == "Knowledge is often analyzed as justified true belief."
+    assert extractor.claims_seen[0].citations[0].work == "IEP"
+    assert result.unsupported_claims == []
+
+
+@pytest.mark.asyncio
+async def test_generation_service_returns_plaintext_when_fallback_finds_no_claims() -> None:
     extractor = _RecordingExtractor()
     service = GenerationService(
         llm=_FakeLLM("This is not JSON."),

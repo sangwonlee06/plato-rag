@@ -37,17 +37,17 @@ What works:
 - OpenAI embeddings
 - Anthropic generation
 - Structured JSON generation with claim-level citation binding
-- Citation verification with location-aware, metadata-aware matching and bracket-parsing fallback for malformed model output
+- Citation verification with location-aware, metadata-aware matching and claim-level bracket fallback for malformed model output
 - Curated evaluation dataset and CLI runner for retrieval, citation, and grounding checks
 - Bounded retries for external embedding, generation, and bootstrap fetch operations
 - Explicit 503 responses when retrieval or generation backends are unavailable
 - Health and source-metadata endpoints
 - public container builds exclude local-only SEP code via `.dockerignore`
-- 99 passing pytest tests
+- 104 passing pytest tests
 
 What is still rough:
 
-- Bracket-parsed citation fallback is still regex-based and narrower than the structured JSON path
+- Fallback claim reconstruction for malformed model output is still heuristic and less reliable than clean structured JSON responses
 - The evaluation set is still seed-sized and hand-curated rather than statistically representative
 - Operational behavior is tighter, but failures are still handled with simple bounded retries rather than circuit breakers or queue-backed recovery
 

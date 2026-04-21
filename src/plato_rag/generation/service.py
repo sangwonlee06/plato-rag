@@ -6,6 +6,7 @@ import logging
 from dataclasses import dataclass
 
 from plato_rag.domain.chunk import ScoredChunk
+from plato_rag.generation.bracket_fallback import parse_bracketed_generation
 from plato_rag.generation.citation_extractor import BasicCitationExtractor
 from plato_rag.generation.prompts.philosophy import build_query_messages
 from plato_rag.generation.structured_output import (
@@ -87,7 +88,7 @@ class GenerationService:
             return parse_structured_generation(raw_output)
         except StructuredOutputParseError as exc:
             logger.warning("Structured generation parse failed; falling back: %s", exc)
-            return raw_output, []
+            return parse_bracketed_generation(raw_output)
 
 
 def _unsupported_claims(
