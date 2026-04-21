@@ -1,0 +1,237 @@
+version: "1.0"
+name: "public-seed-philosophy-rag"
+description: "Curated public-safe evaluation set spanning primary texts and IEP reference coverage."
+cases:
+  - id: "meno_recollection_primary"
+    question: "In Plato's Meno, what is recollection supposed to explain?"
+    tags: ["primary", "plato", "epistemology", "recollection"]
+    notes: "Checks a direct primary-text question with a strong work-specific expectation."
+    options:
+      max_chunks: 5
+      allowed_collections: ["platonic_dialogues"]
+    expectations:
+      answer_must_contain: ["recollection"]
+      required_retrieved_works: ["Meno"]
+      required_retrieved_collections: ["platonic_dialogues"]
+      required_citations:
+        - work: "Meno"
+          collection: "platonic_dialogues"
+          source_class: "primary_text"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0
+
+  - id: "phaedo_immortality_primary"
+    question: "How does the Phaedo connect recollection with the soul's immortality?"
+    tags: ["primary", "plato", "metaphysics", "soul"]
+    notes: "Checks a primary-text answer that should stay inside a single dialogue."
+    options:
+      max_chunks: 5
+      allowed_collections: ["platonic_dialogues"]
+    expectations:
+      answer_must_contain: ["soul", "immortality"]
+      required_retrieved_works: ["Phaedo"]
+      required_retrieved_collections: ["platonic_dialogues"]
+      required_citations:
+        - work: "Phaedo"
+          collection: "platonic_dialogues"
+          source_class: "primary_text"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0
+
+  - id: "republic_cave_primary"
+    question: "In Republic Book VII, what does the cave image say about education?"
+    tags: ["primary", "plato", "education", "political_philosophy"]
+    notes: "Targets a canonical passage with stable vocabulary."
+    options:
+      max_chunks: 5
+      allowed_collections: ["platonic_dialogues"]
+    expectations:
+      answer_must_contain: ["cave", "education"]
+      required_retrieved_works: ["Republic Book VII"]
+      required_retrieved_collections: ["platonic_dialogues"]
+      required_citations:
+        - work: "Republic Book VII"
+          collection: "platonic_dialogues"
+          source_class: "primary_text"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0
+
+  - id: "nicomachean_ethics_eudaimonia_primary"
+    question: "In the Nicomachean Ethics, how is eudaimonia connected to the human good?"
+    tags: ["primary", "aristotle", "ethics"]
+    notes: "Checks Bekker-based primary retrieval in Aristotle."
+    options:
+      max_chunks: 5
+      allowed_collections: ["aristotle_corpus"]
+    expectations:
+      answer_must_contain: ["eudaimonia", "good"]
+      required_retrieved_works: ["Nicomachean Ethics"]
+      required_retrieved_collections: ["aristotle_corpus"]
+      required_citations:
+        - work: "Nicomachean Ethics"
+          collection: "aristotle_corpus"
+          source_class: "primary_text"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0
+
+  - id: "politics_polis_primary"
+    question: "According to Aristotle's Politics, why is the polis natural?"
+    tags: ["primary", "aristotle", "political_philosophy"]
+    notes: "Checks a work-specific Politics query."
+    options:
+      max_chunks: 5
+      allowed_collections: ["aristotle_corpus"]
+    expectations:
+      answer_must_contain: ["polis", "natural"]
+      required_retrieved_works: ["Politics"]
+      required_retrieved_collections: ["aristotle_corpus"]
+      required_citations:
+        - work: "Politics"
+          collection: "aristotle_corpus"
+          source_class: "primary_text"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0
+
+  - id: "poetics_tragedy_primary"
+    question: "In Aristotle's Poetics, how is tragedy characterized?"
+    tags: ["primary", "aristotle", "aesthetics"]
+    notes: "Checks another primary-only Aristotelian case with distinctive terminology."
+    options:
+      max_chunks: 5
+      allowed_collections: ["aristotle_corpus"]
+    expectations:
+      answer_must_contain: ["tragedy"]
+      required_retrieved_works: ["Poetics"]
+      required_retrieved_collections: ["aristotle_corpus"]
+      required_citations:
+        - work: "Poetics"
+          collection: "aristotle_corpus"
+          source_class: "primary_text"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0
+
+  - id: "epistemology_jtb_reference"
+    question: "What is the justified true belief account of knowledge?"
+    tags: ["reference", "iep", "epistemology"]
+    notes: "Allows either of the two strongest current IEP entries on knowledge."
+    options:
+      max_chunks: 5
+      allowed_collections: ["iep"]
+    expectations:
+      answer_must_contain: ["justified true belief"]
+      required_retrieved_works_any_of: ["Epistemology", "Knowledge"]
+      required_retrieved_collections: ["iep"]
+      required_citations_any_of:
+        - work: "Epistemology"
+          collection: "iep"
+          source_class: "reference_encyclopedia"
+        - work: "Knowledge"
+          collection: "iep"
+          source_class: "reference_encyclopedia"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0
+
+  - id: "skepticism_reference"
+    question: "What is contemporary skepticism in epistemology?"
+    tags: ["reference", "iep", "epistemology", "skepticism"]
+    notes: "Checks a specialized modern reference query."
+    options:
+      max_chunks: 5
+      allowed_collections: ["iep"]
+    expectations:
+      answer_must_contain: ["skepticism"]
+      required_retrieved_works: ["Contemporary Skepticism"]
+      required_retrieved_collections: ["iep"]
+      required_citations:
+        - work: "Contemporary Skepticism"
+          collection: "iep"
+          source_class: "reference_encyclopedia"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0
+
+  - id: "free_will_reference"
+    question: "What is the central issue in debates about free will?"
+    tags: ["reference", "iep", "metaphysics"]
+    notes: "Checks a modern thematic IEP entry."
+    options:
+      max_chunks: 5
+      allowed_collections: ["iep"]
+    expectations:
+      answer_must_contain: ["free will"]
+      required_retrieved_works: ["Free Will"]
+      required_retrieved_collections: ["iep"]
+      required_citations:
+        - work: "Free Will"
+          collection: "iep"
+          source_class: "reference_encyclopedia"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0
+
+  - id: "consciousness_reference"
+    question: "What problem does philosophy of mind mean by consciousness?"
+    tags: ["reference", "iep", "philosophy_of_mind"]
+    notes: "Checks philosophy-of-mind coverage outside ancient material."
+    options:
+      max_chunks: 5
+      allowed_collections: ["iep"]
+    expectations:
+      answer_must_contain: ["consciousness"]
+      required_retrieved_works: ["Consciousness"]
+      required_retrieved_collections: ["iep"]
+      required_citations:
+        - work: "Consciousness"
+          collection: "iep"
+          source_class: "reference_encyclopedia"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0
+
+  - id: "virtue_ethics_reference"
+    question: "What makes virtue ethics different from rule-centered moral theories?"
+    tags: ["reference", "iep", "ethics"]
+    notes: "Checks a core ethics reference query."
+    options:
+      max_chunks: 5
+      allowed_collections: ["iep"]
+    expectations:
+      answer_must_contain: ["virtue ethics"]
+      required_retrieved_works: ["Virtue Ethics"]
+      required_retrieved_collections: ["iep"]
+      required_citations:
+        - work: "Virtue Ethics"
+          collection: "iep"
+          source_class: "reference_encyclopedia"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0
+
+  - id: "meaning_communication_reference"
+    question: "How does philosophy of language distinguish meaning from communication?"
+    tags: ["reference", "iep", "philosophy_of_language"]
+    notes: "Allows either the broad field entry or the dedicated meaning/communication entry."
+    options:
+      max_chunks: 5
+      allowed_collections: ["iep"]
+    expectations:
+      answer_must_contain: ["meaning", "communication"]
+      required_retrieved_works_any_of: ["Philosophy of Language", "Meaning and Communication"]
+      required_retrieved_collections: ["iep"]
+      required_citations_any_of:
+        - work: "Philosophy of Language"
+          collection: "iep"
+          source_class: "reference_encyclopedia"
+        - work: "Meaning and Communication"
+          collection: "iep"
+          source_class: "reference_encyclopedia"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0

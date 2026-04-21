@@ -38,14 +38,15 @@ What works:
 - Anthropic generation
 - Structured JSON generation with claim-level citation binding
 - Citation verification with location-aware, metadata-aware matching and bracket-parsing fallback for malformed model output
+- Curated evaluation dataset and CLI runner for retrieval, citation, and grounding checks
 - Health and source-metadata endpoints
 - public container builds exclude local-only SEP code via `.dockerignore`
-- 86 passing pytest tests
+- 91 passing pytest tests
 
 What is still rough:
 
 - Bracket-parsed citation fallback is still regex-based and narrower than the structured JSON path
-- No proper evaluation harness yet
+- The evaluation set is still seed-sized and hand-curated rather than statistically representative
 - Error handling and retry behavior need more work
 
 ## What this service is for
@@ -125,6 +126,7 @@ If the service cannot ground an answer well, it is supposed to say so.
 │   ├── api/
 │   ├── db/
 │   ├── domain/
+│   ├── evaluation/
 │   ├── guardrails/
 │   ├── generation/
 │   ├── ingestion/
@@ -262,16 +264,46 @@ python scripts/ingest_primary.py \
   --translation "W.R.M. Lamb"
 ```
 
+## Evaluation
+
+The repo now includes a curated evaluation set at `data/evaluation/public_seed.yaml`.
+It is meant to catch retrieval, citation, and grounding regressions against the
+current public-safe seed corpus rather than serve as a leaderboard benchmark.
+
+Each case specifies:
+
+- the user question and request options
+- required retrieved works or collections
+- required grounded citations
+- answer anchor phrases
+- caps on ungrounded citations and unsupported claims
+
+Run it against a live service:
+
+```bash
+python scripts/run_evaluation.py --base-url http://localhost:8001
+```
+
+Useful filters:
+
+```bash
+python scripts/run_evaluation.py --base-url http://localhost:8001 --tag primary
+python scripts/run_evaluation.py --base-url http://localhost:8001 --case-id meno_recollection_primary
+python scripts/run_evaluation.py --base-url http://localhost:8001 --output eval-report.json
+```
+
 ## Testing and linting
 
 Verified locally:
 
 - `pytest -q`
+- `python scripts/run_evaluation.py --help`
 
 Common commands:
 
 ```bash
 pytest -q
+python scripts/run_evaluation.py --base-url http://localhost:8001
 ruff check src tests scripts
 ```
 
@@ -292,8 +324,8 @@ Short version:
 - ingest more texts
 - expand public IEP coverage beyond the current seed set
 - add more non-Platonic public-domain primary texts with citation-grade location systems
-- further harden citation matching with a real evaluation set and error analysis
-- build a real evaluation set
+- expand the evaluation set and use it for regression gates
+- further harden citation matching with evaluation-driven error analysis
 - tighten operational behavior around retries and failures
 
 If you want the more detailed architecture story, see `ARCHITECTURE.md`.

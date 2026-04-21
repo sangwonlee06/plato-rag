@@ -8,6 +8,8 @@ This directory holds corpus configuration and prepared text files for ingestion.
 data/
   corpus_manifest.yaml    # Declarative corpus description
   README.md               # This file
+  evaluation/             # Curated evaluation datasets
+    public_seed.yaml      # Seed regression set for the public-safe corpus
   prepared/               # Prepared text files ready for ingestion
     meno_sample.txt       # Meno excerpt (Jowett translation, public domain)
 ```
@@ -52,6 +54,25 @@ The next section begins here.
 | `presocratic_fragments` | DK | `22B30` |
 | `sep` | Section | `2.1`, `§3` |
 | `iep` | Section | `1`, `1.a`, `§1.a` |
+
+---
+
+## Evaluation data
+
+`data/evaluation/` holds curated regression sets for the current corpus. These
+are not raw benchmark dumps. They are hand-authored cases that encode expected
+retrieval targets, citation targets, and grounding behavior for stable
+questions against the seeded public corpus.
+
+The current committed file is:
+
+- `data/evaluation/public_seed.yaml`
+
+Run it with:
+
+```bash
+python scripts/run_evaluation.py --base-url http://localhost:8001
+```
 
 ---
 
