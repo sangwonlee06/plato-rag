@@ -98,7 +98,7 @@ class IngestionService:
                     speaker=rc.speaker,
                     interlocutor=rc.interlocutor,
                     context_type=rc.context_type,
-                    extra_metadata=rc.extra_metadata,
+                    extra_metadata=_merged_chunk_metadata(metadata, rc.extra_metadata),
                     chunk_index=rc.chunk_index,
                     token_count=rc.token_count,
                     overlap_tokens=rc.overlap_tokens,
@@ -114,3 +114,25 @@ class IngestionService:
             await self._session.commit()
 
         return IngestResult(document_id=metadata.id, chunk_count=count)
+
+
+def _merged_chunk_metadata(
+    metadata: DocumentMetadata,
+    raw_chunk_metadata: dict[str, str] | None,
+) -> dict[str, object] | None:
+    merged: dict[str, object] = dict(raw_chunk_metadata or {})
+
+    if metadata.tradition:
+        merged.setdefault("tradition", metadata.tradition)
+    if metadata.period:
+        merged.setdefault("period", metadata.period)
+    if metadata.topics:
+        merged.setdefault("topics", list(metadata.topics))
+    if metadata.translation:
+        merged.setdefault("translation", metadata.translation)
+    if metadata.edition:
+        merged.setdefault("edition", metadata.edition)
+    if metadata.source_url:
+        merged.setdefault("source_url", metadata.source_url)
+
+    return merged or None

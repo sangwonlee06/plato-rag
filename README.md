@@ -36,14 +36,15 @@ What works:
 - PostgreSQL + pgvector storage
 - OpenAI embeddings
 - Anthropic generation
-- Citation extraction with post-generation verification
+- Structured JSON generation with claim-level citation binding
+- Citation verification with bracket-parsing fallback for malformed model output
 - Health and source-metadata endpoints
 - public container builds exclude local-only SEP code via `.dockerignore`
-- 77 passing pytest tests
+- 84 passing pytest tests
 
 What is still rough:
 
-- Citation extraction is regex-based and still limited
+- Bracket-parsed citation fallback is still regex-based and limited
 - No proper evaluation harness yet
 - Error handling and retry behavior need more work
 
@@ -201,6 +202,7 @@ Useful commands:
 ```bash
 python scripts/ingest_corpus.py --dry-run
 python scripts/ingest_corpus.py
+python scripts/ingest_corpus.py --replace-existing
 ```
 
 The scalable path is manifest-driven:
@@ -219,6 +221,19 @@ python scripts/ingest_corpus.py --dry-run --only euthydemus nicomachean-ethics
 ```bash
 python scripts/ingest_corpus.py --only euthydemus nicomachean-ethics
 ```
+
+6. when manifest metadata changes and stored seed chunks need to be refreshed, replace the
+existing rows for the selected seed entries before reingesting:
+
+```bash
+python scripts/ingest_corpus.py --replace-existing --only epistemology republic
+python scripts/ingest_corpus.py --replace-existing
+```
+
+Generation now asks the LLM for a JSON envelope with an `answer` plus explicit `claims`
+and per-claim `citations`. That structured path is the primary claim-to-citation binding
+mechanism. Legacy bracket parsing is retained only as a fallback when the model returns
+malformed output.
 
 There is also a one-off primary text ingestion script:
 

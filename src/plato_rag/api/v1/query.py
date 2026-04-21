@@ -113,7 +113,9 @@ async def query(
                 work=cit.work,
                 author=cit.author or "",
                 location=cit.location,
+                claim_text=cit.claim_text,
                 excerpt=cit.excerpt,
+                match_score=cit.match_score,
                 source_type=(
                     compat_source_type_for(cit.source_class)
                     if cit.source_class
@@ -147,6 +149,7 @@ async def query(
             raw_similarity_scores=[sc.similarity_score for sc in retrieval_result.chunks],
             boosted_scores=[sc.effective_score for sc in retrieval_result.chunks],
             ungrounded_citations=gen_result.ungrounded_citations,
+            unsupported_claims=gen_result.unsupported_claims,
         )
 
     return QueryResponse(

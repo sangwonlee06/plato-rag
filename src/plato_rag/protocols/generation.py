@@ -16,15 +16,31 @@ class LLMMessage:
     content: str
 
 
+@dataclass(frozen=True)
+class StructuredCitation:
+    work: str
+    location: str | None = None
+    author: str | None = None
+    collection: str | None = None
+
+
+@dataclass(frozen=True)
+class StructuredClaim:
+    claim: str
+    citations: list[StructuredCitation]
+
+
 @dataclass
 class ExtractedCitation:
     """A citation parsed from LLM output and matched against retrieval."""
 
     work: str
     location: str | None = None
+    claim_text: str | None = None
     excerpt: str | None = None
     matched_chunk_id: UUID | None = None
     is_grounded: bool = False
+    match_score: float | None = None
     source_class: SourceClass | None = None
     collection: str | None = None
     source_exposure: SourceExposure | None = None
@@ -43,4 +59,7 @@ class CitationExtractor(Protocol):
         self,
         generated_text: str,
         retrieved_chunks: list[ChunkData],
+        *,
+        question: str | None = None,
+        claims: list[StructuredClaim] | None = None,
     ) -> list[ExtractedCitation]: ...

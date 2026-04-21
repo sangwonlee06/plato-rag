@@ -18,8 +18,15 @@ import unicodedata
 from dataclasses import dataclass
 
 from plato_rag.domain.chunk import ChunkData
+from plato_rag.domain.philosophy_profile import (
+    PhilosophyProfile,
+    is_explicit_ancient_query,
+    profile_chunk,
+    profile_text,
+    significant_tokens,
+)
 from plato_rag.domain.source import collection_exposure
-from plato_rag.protocols.generation import ExtractedCitation
+from plato_rag.protocols.generation import ExtractedCitation, StructuredClaim
 
 CITATION_PATTERN = re.compile(r"\[(?P<content>[^\]]+)\]")
 ENCYCLOPEDIA_CITATION_PATTERN = re.compile(
@@ -44,11 +51,12 @@ class _ParsedCitation:
     location: str | None = None
     collection_hint: str | None = None
     author_hint: str | None = None
+    claim_text: str | None = None
 
 
 @dataclass(frozen=True)
 class _CandidateMatch:
-    score: int
+    score: float
     chunk: ChunkData
 
 
@@ -59,17 +67,30 @@ class BasicCitationExtractor:
         self,
         generated_text: str,
         retrieved_chunks: list[ChunkData],
+        *,
+        question: str | None = None,
+        claims: list[StructuredClaim] | None = None,
     ) -> list[ExtractedCitation]:
-        parsed_citations = self._parse_citations(generated_text)
+        parsed_citations = (
+            self._parse_structured_claims(claims)
+            if claims
+            else self._parse_citations(generated_text)
+        )
+        question_profile = profile_text(question or "")
         verified: list[ExtractedCitation] = []
 
         for citation in parsed_citations:
-            match = self._match_to_chunk(citation, retrieved_chunks)
+            match = self._match_to_chunk(
+                citation,
+                retrieved_chunks,
+                question_profile=question_profile,
+            )
             if match is None:
                 verified.append(
                     ExtractedCitation(
                         work=citation.work,
                         location=citation.location,
+                        claim_text=citation.claim_text,
                         is_grounded=False,
                     )
                 )
@@ -79,9 +100,15 @@ class BasicCitationExtractor:
                 ExtractedCitation(
                     work=match.work_title,
                     location=citation.location or match.location_display,
+                    claim_text=citation.claim_text,
                     excerpt=match.text[:200] if match.text else None,
                     matched_chunk_id=match.id,
                     is_grounded=True,
+                    match_score=self._score_chunk_match(
+                        citation,
+                        match,
+                        question_profile=question_profile,
+                    ),
                     source_class=match.source_class,
                     collection=match.collection,
                     source_exposure=collection_exposure(match.collection),
@@ -93,6 +120,22 @@ class BasicCitationExtractor:
             )
 
         return verified
+
+    def _parse_structured_claims(self, claims: list[StructuredClaim]) -> list[_ParsedCitation]:
+        results: list[_ParsedCitation] = []
+        for claim in claims:
+            for citation in claim.citations:
+                results.append(
+                    _ParsedCitation(
+                        raw=citation.work,
+                        work=citation.work,
+                        location=citation.location,
+                        collection_hint=citation.collection,
+                        author_hint=citation.author,
+                        claim_text=claim.claim,
+                    )
+                )
+        return results
 
     def _parse_citations(self, text: str) -> list[_ParsedCitation]:
         """Extract citations from bracketed markers.
@@ -111,6 +154,7 @@ class BasicCitationExtractor:
             bracket_content = match.group("content").strip()
             if not bracket_content:
                 continue
+            claim_text = _claim_text_for_span(text, match.start(), match.end())
 
             for part in self._split_citation_group(bracket_content):
                 if part in seen:
@@ -127,6 +171,7 @@ class BasicCitationExtractor:
                             location=encyclopedia_match.group("location").strip(),
                             collection_hint=collection,
                             author_hint=encyclopedia_match.group("author").strip(),
+                            claim_text=claim_text,
                         )
                     )
                     continue
@@ -140,6 +185,7 @@ class BasicCitationExtractor:
                             work=collection_match.group("collection").upper(),
                             location=collection_match.group("location").strip(),
                             collection_hint=collection,
+                            claim_text=claim_text,
                         )
                     )
                     continue
@@ -147,10 +193,17 @@ class BasicCitationExtractor:
                 work_and_location = self._split_work_and_location(part)
                 if work_and_location is not None:
                     work, location = work_and_location
-                    results.append(_ParsedCitation(raw=part, work=work, location=location))
+                    results.append(
+                        _ParsedCitation(
+                            raw=part,
+                            work=work,
+                            location=location,
+                            claim_text=claim_text,
+                        )
+                    )
                     continue
 
-                results.append(_ParsedCitation(raw=part, work=part))
+                results.append(_ParsedCitation(raw=part, work=part, claim_text=claim_text))
 
         return results
 
@@ -185,10 +238,16 @@ class BasicCitationExtractor:
         self,
         citation: _ParsedCitation,
         chunks: list[ChunkData],
+        *,
+        question_profile: PhilosophyProfile,
     ) -> ChunkData | None:
         candidates: list[_CandidateMatch] = []
         for chunk in chunks:
-            score = self._score_chunk_match(citation, chunk)
+            score = self._score_chunk_match(
+                citation,
+                chunk,
+                question_profile=question_profile,
+            )
             if score > 0:
                 candidates.append(_CandidateMatch(score=score, chunk=chunk))
 
@@ -208,8 +267,14 @@ class BasicCitationExtractor:
 
         return best.chunk
 
-    def _score_chunk_match(self, citation: _ParsedCitation, chunk: ChunkData) -> int:
-        score = 0
+    def _score_chunk_match(
+        self,
+        citation: _ParsedCitation,
+        chunk: ChunkData,
+        *,
+        question_profile: PhilosophyProfile,
+    ) -> float:
+        score = 0.0
 
         if citation.collection_hint is not None:
             if chunk.collection != citation.collection_hint:
@@ -237,6 +302,18 @@ class BasicCitationExtractor:
             else:
                 return 0
 
+        claim_support = self._claim_support_score(
+            citation.claim_text,
+            chunk,
+            question_profile=question_profile,
+        )
+        score += claim_support
+
+        if citation.claim_text and claim_support < 10 and citation.location is None:
+            return 0
+        if citation.claim_text and claim_support < 6 and citation.collection_hint is not None:
+            return 0
+
         return score
 
     def _range_anchor_bonus(self, location: str, chunk: ChunkData) -> int:
@@ -249,6 +326,68 @@ class BasicCitationExtractor:
         if end is not None and chunk.location_ref.matches_value(end):
             return 5
         return 0
+
+    def _claim_support_score(
+        self,
+        claim_text: str | None,
+        chunk: ChunkData,
+        *,
+        question_profile: PhilosophyProfile,
+    ) -> float:
+        if not claim_text:
+            return 0.0
+
+        claim_profile = profile_text(claim_text)
+        chunk_profile = profile_chunk(chunk)
+        claim_tokens = significant_tokens(claim_text)
+        chunk_tokens = significant_tokens(
+            " ".join(
+                part
+                for part in (
+                    chunk.work_title,
+                    chunk.section_title or "",
+                    chunk.text,
+                )
+                if part
+            )
+        )
+
+        overlap = len(claim_tokens & chunk_tokens)
+        score = min(overlap * 4.0, 28.0)
+
+        score += 10.0 * len(claim_profile.topics & chunk_profile.topics)
+        score += 8.0 * len(claim_profile.traditions & chunk_profile.traditions)
+        score += 6.0 * len(claim_profile.periods & chunk_profile.periods)
+
+        score += 4.0 * len(question_profile.topics & chunk_profile.topics)
+        score += 3.0 * len(question_profile.traditions & chunk_profile.traditions)
+        score += 2.0 * len(question_profile.periods & chunk_profile.periods)
+
+        if (
+            chunk.collection == "platonic_dialogues"
+            and "ancient" in chunk_profile.traditions
+            and not is_explicit_ancient_query(question_profile)
+            and (
+                (question_profile.topics and not (question_profile.topics & chunk_profile.topics))
+                or _is_general_philosophy_question(question_profile)
+            )
+        ):
+            score -= 10.0
+
+        if claim_profile.philosophers:
+            if claim_profile.philosophers & chunk_profile.philosophers:
+                score += 8.0
+            else:
+                score -= 6.0
+
+        if (
+            claim_profile.topics
+            and chunk_profile.topics
+            and not (claim_profile.topics & chunk_profile.topics)
+        ):
+            score -= 8.0
+
+        return score
 
 
 def _normalize_name(value: str) -> str:
@@ -312,3 +451,45 @@ def _split_location_range(value: str) -> tuple[str | None, str | None]:
     if len(parts) == 1:
         return parts[0].strip(), None
     return parts[0].strip(), parts[1].strip()
+
+
+def _claim_text_for_span(text: str, start: int, end: int) -> str:
+    left_boundary = max(
+        text.rfind(".", 0, start),
+        text.rfind("?", 0, start),
+        text.rfind("!", 0, start),
+        text.rfind("\n", 0, start),
+    )
+    right_candidates = [
+        boundary
+        for boundary in (
+            text.find(".", end),
+            text.find("?", end),
+            text.find("!", end),
+            text.find("\n", end),
+        )
+        if boundary != -1
+    ]
+    right_boundary = min(right_candidates) if right_candidates else len(text)
+
+    sentence = text[left_boundary + 1 : right_boundary].strip()
+    sentence = CITATION_PATTERN.sub("", sentence)
+    sentence = re.sub(r"\s+", " ", sentence).strip(" ;,:")
+    return sentence
+
+
+def _is_general_philosophy_question(question_profile: PhilosophyProfile) -> bool:
+    return (
+        bool(
+            question_profile.topics
+            & {
+                "ethics",
+                "metaphysics",
+                "epistemology",
+                "philosophy_of_mind",
+                "philosophy_of_language",
+                "logic",
+            }
+        )
+        and not question_profile.traditions
+    )

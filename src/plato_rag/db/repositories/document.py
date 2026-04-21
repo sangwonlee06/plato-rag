@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import func, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from plato_rag.db.models import DocumentModel
@@ -57,6 +57,34 @@ class DocumentRepository:
             .values(corpus_entry_id=corpus_entry_id)
         )
         await self._session.flush()
+
+    async def list_ids_for_corpus_entry_ids(
+        self,
+        corpus_entry_ids: list[str],
+    ) -> dict[str, uuid.UUID]:
+        if not corpus_entry_ids:
+            return {}
+
+        result = await self._session.execute(
+            select(DocumentModel.corpus_entry_id, DocumentModel.id).where(
+                DocumentModel.corpus_entry_id.in_(corpus_entry_ids)
+            )
+        )
+        return {
+            corpus_entry_id: document_id
+            for corpus_entry_id, document_id in result.all()
+            if corpus_entry_id is not None
+        }
+
+    async def delete_by_ids(self, document_ids: list[uuid.UUID]) -> int:
+        if not document_ids:
+            return 0
+
+        result = await self._session.execute(
+            delete(DocumentModel).where(DocumentModel.id.in_(document_ids))
+        )
+        await self._session.flush()
+        return int(result.rowcount or 0)
 
     async def get_by_hash(self, raw_hash: str) -> DocumentMetadata | None:
         result = await self._session.execute(

@@ -1,6 +1,9 @@
 """Tests for retrieval policy behavior."""
 
+from dataclasses import replace
+
 from plato_rag.domain.chunk import ChunkData, ScoredChunk
+from plato_rag.domain.location import LocationRef, LocationSystem
 from plato_rag.domain.source import SourceClass
 from plato_rag.retrieval.policy import PLATO_RETRIEVAL_POLICY
 from plato_rag.retrieval.reranker.source_priority import SourcePriorityReranker
@@ -76,3 +79,84 @@ class TestSourcePriorityReranker:
         result = reranker.rerank(chunks, "test", PLATO_RETRIEVAL_POLICY)
         assert result[0].boosted_score is not None
         assert abs(result[0].boosted_score - 0.80 * 1.30) < 0.001
+
+    def test_topic_aligned_reference_can_beat_ancient_primary_for_general_query(
+        self,
+        primary_chunk: ChunkData,
+    ) -> None:
+        reranker = SourcePriorityReranker()
+        ancient_primary = replace(
+            primary_chunk,
+            text="Socrates discusses recollection and the immortality of the soul.",
+            extra_metadata={
+                "tradition": "ancient",
+                "period": "classical_greek",
+                "topics": ["epistemology", "ethics"],
+            },
+        )
+        mind_reference = ChunkData(
+            id=primary_chunk.id,
+            document_id=primary_chunk.document_id,
+            text="Consciousness concerns phenomenal awareness and subjective experience.",
+            source_class=SourceClass.REFERENCE_ENCYCLOPEDIA,
+            collection="iep",
+            work_title="Consciousness",
+            author="Rocco J. Gennaro",
+            location_ref=LocationRef(system=LocationSystem.SECTION, value="1"),
+            section_title="Introduction",
+            extra_metadata={
+                "tradition": "cross_tradition",
+                "period": "historical_and_contemporary",
+                "topics": ["philosophy_of_mind", "consciousness"],
+            },
+        )
+        chunks = [
+            ScoredChunk(chunk=ancient_primary, similarity_score=0.84),
+            ScoredChunk(chunk=mind_reference, similarity_score=0.80),
+        ]
+
+        result = reranker.rerank(
+            chunks,
+            "What is consciousness in philosophy of mind?",
+            PLATO_RETRIEVAL_POLICY,
+        )
+
+        assert result[0].chunk.work_title == "Consciousness"
+
+    def test_explicit_plato_query_preserves_primary_priority(
+        self,
+        primary_chunk: ChunkData,
+        sep_chunk: ChunkData,
+    ) -> None:
+        reranker = SourcePriorityReranker()
+        plato_chunk = replace(
+            primary_chunk,
+            extra_metadata={
+                "tradition": "ancient",
+                "period": "classical_greek",
+                "topics": ["epistemology", "ethics"],
+            },
+        )
+        modern_reference = replace(
+            sep_chunk,
+            collection="iep",
+            work_title="Epistemology",
+            author="David A. Truncellito",
+            extra_metadata={
+                "tradition": "cross_tradition",
+                "period": "historical_and_contemporary",
+                "topics": ["epistemology", "knowledge"],
+            },
+        )
+        chunks = [
+            ScoredChunk(chunk=modern_reference, similarity_score=0.87),
+            ScoredChunk(chunk=plato_chunk, similarity_score=0.80),
+        ]
+
+        result = reranker.rerank(
+            chunks,
+            "How does Plato describe recollection in the Meno?",
+            PLATO_RETRIEVAL_POLICY,
+        )
+
+        assert result[0].chunk.work_title == "Meno"

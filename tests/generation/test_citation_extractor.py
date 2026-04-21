@@ -118,21 +118,25 @@ def test_extractor_splits_multiple_citations_in_one_bracket() -> None:
             work_title="Meno",
             author="Plato",
             collection="platonic_dialogues",
-            text="Virtue is discussed directly in the dialogue.",
+            text="The dialogue frames inquiry in terms of knowledge and learning.",
             location_ref=LocationRef(system=LocationSystem.STEPHANUS, value="86b"),
         ),
         _chunk(
             work_title="Epistemology",
             author="David A. Truncellito",
             collection="iep",
-            text="The entry summarizes standard debates in epistemology.",
+            text="The entry introduces epistemology as the study of knowledge.",
             location_ref=LocationRef(system=LocationSystem.SECTION, value="1"),
         ),
     ]
 
     citations = extractor.extract(
-        "The answer draws on both sources [Meno 86b; David A. Truncellito, IEP §1].",
+        (
+            "Both sources frame the issue in terms of knowledge and inquiry "
+            "[Meno 86b; David A. Truncellito, IEP §1]."
+        ),
         chunks,
+        question="How is knowledge framed in philosophy?",
     )
 
     assert len(citations) == 2
@@ -159,6 +163,61 @@ def test_extractor_leaves_ambiguous_work_only_citations_ungrounded() -> None:
     ]
 
     citations = extractor.extract("Plato addresses the issue in the dialogue [Meno].", chunks)
+
+    assert len(citations) == 1
+    assert citations[0].is_grounded is False
+
+
+def test_extractor_prefers_claim_aligned_chunk_with_same_section_reference() -> None:
+    extractor = BasicCitationExtractor()
+    chunks = [
+        _chunk(
+            work_title="Epistemology",
+            author="David A. Truncellito",
+            collection="iep",
+            text="Knowledge is often analyzed as justified true belief.",
+            location_ref=LocationRef(system=LocationSystem.SECTION, value="2"),
+        ),
+        _chunk(
+            work_title="Epistemology",
+            author="David A. Truncellito",
+            collection="iep",
+            text="Skepticism challenges whether knowledge is possible.",
+            location_ref=LocationRef(system=LocationSystem.SECTION, value="2"),
+        ),
+    ]
+
+    citations = extractor.extract(
+        (
+            "A standard analysis treats knowledge as justified true belief "
+            "[David A. Truncellito, IEP §2]."
+        ),
+        chunks,
+        question="What is knowledge in epistemology?",
+    )
+
+    assert len(citations) == 1
+    assert citations[0].is_grounded is True
+    assert citations[0].matched_chunk_id == chunks[0].id
+
+
+def test_extractor_rejects_weak_claim_level_match() -> None:
+    extractor = BasicCitationExtractor()
+    chunks = [
+        _chunk(
+            work_title="Consciousness",
+            author="Rocco J. Gennaro",
+            collection="iep",
+            text="Consciousness concerns phenomenal awareness and subjective experience.",
+            location_ref=LocationRef(system=LocationSystem.SECTION, value="1"),
+        ),
+    ]
+
+    citations = extractor.extract(
+        "Kant's account of the categorical imperative is central here [Rocco J. Gennaro, IEP §1].",
+        chunks,
+        question="Explain Kantian ethics.",
+    )
 
     assert len(citations) == 1
     assert citations[0].is_grounded is False

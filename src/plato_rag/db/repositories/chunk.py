@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from typing import cast
+from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from plato_rag.db.models import ChunkModel
@@ -78,6 +79,16 @@ class ChunkRepository:
     async def count_total(self) -> int:
         result = await self._session.execute(select(func.count(ChunkModel.id)))
         return result.scalar_one()
+
+    async def delete_by_document_ids(self, document_ids: list[UUID]) -> int:
+        if not document_ids:
+            return 0
+
+        result = await self._session.execute(
+            delete(ChunkModel).where(ChunkModel.document_id.in_(document_ids))
+        )
+        await self._session.flush()
+        return int(result.rowcount or 0)
 
     async def count_by_source_class(self) -> dict[str, int]:
         result = await self._session.execute(

@@ -17,7 +17,9 @@ class CitationResponse(BaseModel):
     work: str
     author: str
     location: str | None = None
+    claim_text: str | None = None
     excerpt: str | None = None
+    match_score: float | None = None
 
     source_type: CompatSourceType
     source_class: SourceClass

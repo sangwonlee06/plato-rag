@@ -41,6 +41,8 @@ async def _ingest_entries(
     entries: list[CorpusEntry],
     manifest_dir: Path,
     chunk_config: ChunkConfig,
+    *,
+    replace_existing: bool = False,
 ) -> None:
     from plato_rag.config import Settings
     from plato_rag.db.engine import create_engine, create_session_factory, dispose_engine
@@ -66,6 +68,9 @@ async def _ingest_entries(
                 headers={"User-Agent": "plato-rag-cli-ingestion/1.0"},
             ) as http_client,
         ):
+            if replace_existing:
+                await _purge_existing_entries(session, [entry.id for entry in entries])
+
             for entry in entries:
                 raw_content = await load_raw_content(entry, manifest_dir, http_client=http_client)
                 service = IngestionService(
@@ -88,11 +93,47 @@ async def _ingest_entries(
         await dispose_engine(engine)
 
 
+async def _purge_existing_entries(session: object, entry_ids: list[str]) -> None:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from plato_rag.db.repositories.chunk import ChunkRepository
+    from plato_rag.db.repositories.document import DocumentRepository
+
+    if not entry_ids:
+        return
+
+    async_session = session
+    if not isinstance(async_session, AsyncSession):
+        raise TypeError("Expected AsyncSession for reingest purge")
+
+    doc_repo = DocumentRepository(async_session)
+    chunk_repo = ChunkRepository(async_session)
+    mapping = await doc_repo.list_ids_for_corpus_entry_ids(entry_ids)
+    document_ids = list(mapping.values())
+    if not document_ids:
+        logger.info("No existing manifest entries to replace")
+        return
+
+    deleted_chunks = await chunk_repo.delete_by_document_ids(document_ids)
+    deleted_documents = await doc_repo.delete_by_ids(document_ids)
+    await async_session.commit()
+    logger.info(
+        "Removed %d existing documents and %d chunks before reingest",
+        deleted_documents,
+        deleted_chunks,
+    )
+
+
 async def main() -> None:
     parser = argparse.ArgumentParser(description="Ingest the curated Plato corpus manifest")
     parser.add_argument("--manifest", default="data/corpus_seed.json")
     parser.add_argument("--only", nargs="+", default=None, help="Entry ids to process")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--replace-existing",
+        action="store_true",
+        help="Delete existing documents/chunks for selected manifest entries before ingesting",
+    )
     parser.add_argument("--max-chunk-tokens", type=int, default=512)
     parser.add_argument("--min-chunk-tokens", type=int, default=50)
     args = parser.parse_args()
@@ -138,7 +179,12 @@ async def main() -> None:
                 )
         return
 
-    await _ingest_entries(selected_entries, manifest_dir, chunk_config)
+    await _ingest_entries(
+        selected_entries,
+        manifest_dir,
+        chunk_config,
+        replace_existing=args.replace_existing,
+    )
 
 
 if __name__ == "__main__":

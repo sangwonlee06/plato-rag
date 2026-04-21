@@ -32,6 +32,7 @@ class DebugResponse(BaseModel):
     boosted_scores: list[float] = []
     generation_prompt_preview: str | None = None
     ungrounded_citations: list[str] = []
+    unsupported_claims: list[str] = []
 
 
 class QueryResponse(BaseModel):
