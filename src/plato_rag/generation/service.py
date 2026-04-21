@@ -22,6 +22,10 @@ from plato_rag.protocols.generation import (
 logger = logging.getLogger(__name__)
 
 
+class GenerationServiceError(RuntimeError):
+    """Raised when answer generation cannot complete operationally."""
+
+
 @dataclass
 class GenerationResult:
     answer: str
@@ -47,7 +51,10 @@ class GenerationService:
     ) -> GenerationResult:
         messages = build_query_messages(question, chunks, conversation_history)
 
-        raw_output = await self._llm.generate(messages)
+        try:
+            raw_output = await self._llm.generate(messages)
+        except Exception as exc:
+            raise GenerationServiceError("Failed to generate answer from LLM") from exc
         answer, claims = self._parse_or_fallback(raw_output)
 
         # Extract and verify citations

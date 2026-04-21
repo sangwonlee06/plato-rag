@@ -38,6 +38,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
             api_key=settings.openai_api_key,
             model=settings.embedding_model,
             dimensions=settings.embedding_dimensions,
+            max_attempts=settings.external_request_max_attempts,
+            initial_backoff_seconds=settings.external_retry_initial_backoff_seconds,
+            max_backoff_seconds=settings.external_retry_max_backoff_seconds,
         )
         if settings.bootstrap_enabled:
             chunk_config = ChunkConfig(
@@ -57,6 +60,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
                             chunk_config=chunk_config,
                             advisory_lock_id=settings.bootstrap_lock_id,
                             http_timeout_seconds=settings.bootstrap_http_timeout_seconds,
+                            external_request_max_attempts=settings.external_request_max_attempts,
+                            external_retry_initial_backoff_seconds=(
+                                settings.external_retry_initial_backoff_seconds
+                            ),
+                            external_retry_max_backoff_seconds=(
+                                settings.external_retry_max_backoff_seconds
+                            ),
                         ),
                     ),
                 ]
@@ -72,6 +82,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
                                 chunk_config=chunk_config,
                                 advisory_lock_id=settings.bootstrap_lock_id,
                                 http_timeout_seconds=settings.bootstrap_http_timeout_seconds,
+                                external_request_max_attempts=settings.external_request_max_attempts,
+                                external_retry_initial_backoff_seconds=(
+                                    settings.external_retry_initial_backoff_seconds
+                                ),
+                                external_retry_max_backoff_seconds=(
+                                    settings.external_retry_max_backoff_seconds
+                                ),
                             ),
                         )
                     )
@@ -96,6 +113,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
             api_key=settings.anthropic_api_key,
             model=settings.generation_model,
             max_tokens=settings.generation_max_tokens,
+            max_attempts=settings.external_request_max_attempts,
+            initial_backoff_seconds=settings.external_retry_initial_backoff_seconds,
+            max_backoff_seconds=settings.external_retry_max_backoff_seconds,
         )
         app.state.generation_service = GenerationService(llm=llm)
 

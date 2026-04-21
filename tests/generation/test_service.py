@@ -8,7 +8,7 @@ import pytest
 from plato_rag.domain.chunk import ChunkData, ScoredChunk
 from plato_rag.domain.location import LocationRef, LocationSystem
 from plato_rag.domain.source import SourceClass
-from plato_rag.generation.service import GenerationService
+from plato_rag.generation.service import GenerationService, GenerationServiceError
 from plato_rag.protocols.generation import ExtractedCitation, StructuredClaim
 
 
@@ -22,6 +22,15 @@ class _FakeLLM:
 
     def model_name(self) -> str:
         return "fake-llm"
+
+
+class _FailingLLM:
+    async def generate(self, messages: list[object]) -> str:
+        del messages
+        raise TimeoutError("llm timeout")
+
+    def model_name(self) -> str:
+        return "failing-llm"
 
 
 @dataclass
@@ -119,3 +128,11 @@ async def test_generation_service_falls_back_when_json_parse_fails() -> None:
     assert result.answer == "This is not JSON."
     assert extractor.claims_seen is None
     assert result.unsupported_claims == []
+
+
+@pytest.mark.asyncio
+async def test_generation_service_wraps_llm_failures() -> None:
+    service = GenerationService(llm=_FailingLLM())
+
+    with pytest.raises(GenerationServiceError, match="generate answer"):
+        await service.generate("What is knowledge?", [_scored_chunk()])

@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+import httpx
 import pytest
 
 from plato_rag.ingestion.corpus import CorpusBootstrapError, ensure_seed_corpus
@@ -125,6 +126,18 @@ class _FakeHttpClient:
     async def get(self, url: str) -> _FakeHttpResponse:
         del url
         return _FakeHttpResponse(self._text)
+
+
+class _RetryingFakeHttpClient(_FakeHttpClient):
+    def __init__(self, text: str) -> None:
+        super().__init__(text)
+        self.calls = 0
+
+    async def get(self, url: str) -> _FakeHttpResponse:
+        self.calls += 1
+        if self.calls == 1:
+            raise httpx.ReadTimeout("timed out")
+        return await super().get(url)
 
 
 @pytest.fixture
@@ -394,4 +407,35 @@ async def test_bootstrap_allows_aristotle_perseus_entries_without_text_identifie
     result = await _run_bootstrap(manifest_path, _BootstrapState())
 
     assert result.status == "bootstrapped"
+
+
+@pytest.mark.asyncio
+async def test_bootstrap_retries_transient_http_fetch_failures(
+    tmp_path: Path,
+    fake_bootstrap_dependencies: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    manifest_path = _write_manifest(
+        tmp_path,
+        [
+            {
+                "id": "epistemology-iep",
+                "kind": "iep_url",
+                "collection": "iep",
+                "title": "Epistemology",
+                "author": "David A. Truncellito",
+                "source_url": "https://iep.utm.edu/epistemo/",
+            },
+        ],
+    )
+    http_client = _RetryingFakeHttpClient("<html>ok</html>")
+    monkeypatch.setattr(
+        "plato_rag.ingestion.corpus.httpx.AsyncClient",
+        lambda **_: http_client,
+    )
+
+    result = await _run_bootstrap(manifest_path, _BootstrapState())
+
+    assert result.status == "bootstrapped"
+    assert http_client.calls == 2
     assert result.ingested_entries == 1

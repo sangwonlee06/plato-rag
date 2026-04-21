@@ -39,15 +39,17 @@ What works:
 - Structured JSON generation with claim-level citation binding
 - Citation verification with location-aware, metadata-aware matching and bracket-parsing fallback for malformed model output
 - Curated evaluation dataset and CLI runner for retrieval, citation, and grounding checks
+- Bounded retries for external embedding, generation, and bootstrap fetch operations
+- Explicit 503 responses when retrieval or generation backends are unavailable
 - Health and source-metadata endpoints
 - public container builds exclude local-only SEP code via `.dockerignore`
-- 91 passing pytest tests
+- 99 passing pytest tests
 
 What is still rough:
 
 - Bracket-parsed citation fallback is still regex-based and narrower than the structured JSON path
 - The evaluation set is still seed-sized and hand-curated rather than statistically representative
-- Error handling and retry behavior need more work
+- Operational behavior is tighter, but failures are still handled with simple bounded retries rather than circuit breakers or queue-backed recovery
 
 ## What this service is for
 
@@ -185,6 +187,9 @@ The important ones are:
 | `PLATO_RAG_ENABLE_LOCAL_ONLY_SEP` | Enables local-only SEP bootstrap in non-public environments |
 | `PLATO_RAG_LOCAL_ONLY_MANIFEST_PATH` | Local-only SEP manifest path |
 | `PLATO_RAG_FAIL_START_ON_RESTRICTED_CONFIG` | Fails startup instead of warning on unsafe source configuration |
+| `PLATO_RAG_EXTERNAL_REQUEST_MAX_ATTEMPTS` | Max attempts for transient external calls |
+| `PLATO_RAG_EXTERNAL_RETRY_INITIAL_BACKOFF_SECONDS` | Initial retry backoff for transient external calls |
+| `PLATO_RAG_EXTERNAL_RETRY_MAX_BACKOFF_SECONDS` | Max retry backoff for transient external calls |
 
 ## Ingestion
 

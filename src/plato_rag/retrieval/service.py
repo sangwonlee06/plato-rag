@@ -25,6 +25,10 @@ from plato_rag.retrieval.reranker.source_priority import SourcePriorityReranker
 logger = logging.getLogger(__name__)
 
 
+class RetrievalServiceError(RuntimeError):
+    """Raised when retrieval cannot complete due to an operational failure."""
+
+
 @dataclass
 class GroundingAssessment:
     interpretation_level: InterpretationLevel
@@ -59,8 +63,11 @@ class RetrievalService:
         source_filter: list[SourceClass] | None = None,
         allowed_collections: list[str] | None = None,
     ) -> RetrievalResult:
-        vectors = await self._embedder.embed([query])
-        query_vector = vectors[0]
+        try:
+            vectors = await self._embedder.embed([query])
+            query_vector = vectors[0]
+        except Exception as exc:
+            raise RetrievalServiceError("Failed to embed retrieval query") from exc
 
         # Staged retrieval: search each stage separately so high-priority
         # classes get dedicated search budget. Early exit when we have
@@ -75,14 +82,17 @@ class RetrievalService:
                 if not stage_classes:
                     continue
 
-            results = await self._store.search(
-                query_vector=query_vector,
-                filters=SearchFilters(
-                    source_classes=stage_classes,
-                    collections=allowed_collections,
-                ),
-                limit=stage.max_candidates,
-            )
+            try:
+                results = await self._store.search(
+                    query_vector=query_vector,
+                    filters=SearchFilters(
+                        source_classes=stage_classes,
+                        collections=allowed_collections,
+                    ),
+                    limit=stage.max_candidates,
+                )
+            except Exception as exc:
+                raise RetrievalServiceError("Failed to search retrieval store") from exc
             above = [r for r in results if r.similarity_score >= policy.similarity_threshold]
             all_candidates.extend(above)
             results_returned += len(results)

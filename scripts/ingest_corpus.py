@@ -20,6 +20,7 @@ from pathlib import Path
 
 import httpx
 
+from plato_rag.config import Settings
 from plato_rag.ingestion.corpus import (
     CorpusEntry,
     chunker_for,
@@ -44,7 +45,6 @@ async def _ingest_entries(
     *,
     replace_existing: bool = False,
 ) -> None:
-    from plato_rag.config import Settings
     from plato_rag.db.engine import create_engine, create_session_factory, dispose_engine
     from plato_rag.ingestion.embedders.openai import OpenAIEmbedder
     from plato_rag.ingestion.service import IngestionService
@@ -56,6 +56,9 @@ async def _ingest_entries(
         api_key=settings.openai_api_key,
         model=settings.embedding_model,
         dimensions=settings.embedding_dimensions,
+        max_attempts=settings.external_request_max_attempts,
+        initial_backoff_seconds=settings.external_retry_initial_backoff_seconds,
+        max_backoff_seconds=settings.external_retry_max_backoff_seconds,
     )
     timeout = httpx.Timeout(settings.bootstrap_http_timeout_seconds)
 
@@ -72,7 +75,14 @@ async def _ingest_entries(
                 await _purge_existing_entries(session, [entry.id for entry in entries])
 
             for entry in entries:
-                raw_content = await load_raw_content(entry, manifest_dir, http_client=http_client)
+                raw_content = await load_raw_content(
+                    entry,
+                    manifest_dir,
+                    http_client=http_client,
+                    max_attempts=settings.external_request_max_attempts,
+                    initial_backoff_seconds=settings.external_retry_initial_backoff_seconds,
+                    max_backoff_seconds=settings.external_retry_max_backoff_seconds,
+                )
                 service = IngestionService(
                     session=session,
                     parser=parser_for(entry),
@@ -155,13 +165,21 @@ async def main() -> None:
     )
 
     if args.dry_run:
+        settings = Settings()
         async with httpx.AsyncClient(
             follow_redirects=True,
             timeout=httpx.Timeout(30.0),
             headers={"User-Agent": "plato-rag-cli-ingestion/1.0"},
         ) as http_client:
             for entry in selected_entries:
-                raw_content = await load_raw_content(entry, manifest_dir, http_client=http_client)
+                raw_content = await load_raw_content(
+                    entry,
+                    manifest_dir,
+                    http_client=http_client,
+                    max_attempts=settings.external_request_max_attempts,
+                    initial_backoff_seconds=settings.external_retry_initial_backoff_seconds,
+                    max_backoff_seconds=settings.external_retry_max_backoff_seconds,
+                )
                 section_count, chunk_count, parser_version = dry_run_entry(
                     entry=entry,
                     raw_content=raw_content,

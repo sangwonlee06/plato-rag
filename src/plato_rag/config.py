@@ -41,6 +41,9 @@ class Settings(BaseSettings):
     local_only_manifest_path: Path = _PROJECT_ROOT / "local_only" / "sep" / "corpus_seed.local.json"
     bootstrap_lock_id: int = 712_341_905
     bootstrap_http_timeout_seconds: float = 30.0
+    external_request_max_attempts: int = 3
+    external_retry_initial_backoff_seconds: float = 0.5
+    external_retry_max_backoff_seconds: float = 4.0
     bootstrap_max_chunk_tokens: int = 512
     bootstrap_min_chunk_tokens: int = 50
     bootstrap_overlap_tokens: int = 64

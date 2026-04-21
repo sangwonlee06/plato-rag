@@ -26,6 +26,7 @@ from plato_rag.ingestion.parsers.plaintext import PlaintextParser
 from plato_rag.ingestion.service import IngestionService
 from plato_rag.protocols.embedding import Embedder
 from plato_rag.protocols.ingestion import ChunkConfig, Chunker, Parser
+from plato_rag.resilience import retry_async
 
 logger = logging.getLogger(__name__)
 
@@ -205,6 +206,9 @@ async def load_raw_content(
     manifest_dir: Path,
     *,
     http_client: httpx.AsyncClient | None = None,
+    max_attempts: int = 3,
+    initial_backoff_seconds: float = 0.5,
+    max_backoff_seconds: float = 4.0,
 ) -> str:
     if entry.kind in FILE_BACKED_ENTRY_KINDS:
         if entry.input_path is None:
@@ -217,8 +221,13 @@ async def load_raw_content(
             raise ValueError(f"Entry {entry.id!r} is missing source_url")
         if http_client is None:
             raise ValueError("http_client is required for URL-backed manifest entries")
-        response = await http_client.get(entry.source_url)
-        response.raise_for_status()
+        response = await retry_async(
+            f"bootstrap fetch for {entry.id}",
+            lambda: _fetch_url(http_client, entry.source_url),
+            max_attempts=max_attempts,
+            initial_backoff_seconds=initial_backoff_seconds,
+            max_backoff_seconds=max_backoff_seconds,
+        )
         return response.text
 
     raise ValueError(f"Unsupported manifest entry kind {entry.kind!r}")
@@ -233,6 +242,9 @@ async def ensure_seed_corpus(
     chunk_config: ChunkConfig,
     advisory_lock_id: int,
     http_timeout_seconds: float,
+    external_request_max_attempts: int = 3,
+    external_retry_initial_backoff_seconds: float = 0.5,
+    external_retry_max_backoff_seconds: float = 4.0,
 ) -> CorpusBootstrapResult:
     manifest_path = manifest_path.resolve()
     entries = load_manifest(manifest_path)
@@ -279,7 +291,19 @@ async def ensure_seed_corpus(
             headers={"User-Agent": "plato-rag-bootstrap/1.0"},
         ) as http_client:
             for entry in pending_entries:
-                raw_content = await load_raw_content(entry, manifest_dir, http_client=http_client)
+                try:
+                    raw_content = await load_raw_content(
+                        entry,
+                        manifest_dir,
+                        http_client=http_client,
+                        max_attempts=external_request_max_attempts,
+                        initial_backoff_seconds=external_retry_initial_backoff_seconds,
+                        max_backoff_seconds=external_retry_max_backoff_seconds,
+                    )
+                except Exception as exc:
+                    raise CorpusBootstrapError(
+                        f"Bootstrap entry {entry.id!r} failed while fetching source content"
+                    ) from exc
                 service = IngestionService(
                     session=session,
                     parser=parser_for(entry),
@@ -344,6 +368,12 @@ def _optional_str(value: object) -> str | None:
     if not isinstance(value, str):
         raise ValueError(f"Expected string value, got {type(value).__name__}")
     return value
+
+
+async def _fetch_url(http_client: httpx.AsyncClient, url: str) -> httpx.Response:
+    response = await http_client.get(url)
+    response.raise_for_status()
+    return response
 
 
 def _string_list(value: object) -> list[str]:

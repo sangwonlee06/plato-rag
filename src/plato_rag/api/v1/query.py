@@ -34,7 +34,7 @@ from plato_rag.domain.source import (
     collection_exposure,
     trust_tier_for,
 )
-from plato_rag.generation.service import GenerationService
+from plato_rag.generation.service import GenerationService, GenerationServiceError
 from plato_rag.guardrails.source_access import (
     SourceAccessPolicyError,
     assert_citations_match_allowed_collections,
@@ -42,7 +42,7 @@ from plato_rag.guardrails.source_access import (
     resolve_allowed_collections,
 )
 from plato_rag.retrieval.policy import PLATO_RETRIEVAL_POLICY
-from plato_rag.retrieval.service import RetrievalService
+from plato_rag.retrieval.service import RetrievalService, RetrievalServiceError
 
 router = APIRouter()
 
@@ -73,12 +73,18 @@ async def query(
         policy = replace(policy, max_chunks=request.options.max_chunks)
 
     # Retrieve
-    retrieval_result = await retrieval_service.retrieve(
-        query=request.question,
-        policy=policy,
-        source_filter=request.options.source_filter,
-        allowed_collections=allowed_collections,
-    )
+    try:
+        retrieval_result = await retrieval_service.retrieve(
+            query=request.question,
+            policy=policy,
+            source_filter=request.options.source_filter,
+            allowed_collections=allowed_collections,
+        )
+    except RetrievalServiceError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Request {request_id}: retrieval backend unavailable.",
+        ) from exc
     try:
         assert_retrieved_chunks_match_allowed_collections(
             retrieval_result.chunks,
@@ -89,11 +95,17 @@ async def query(
 
     # Generate
     history = [(turn.role.value.lower(), turn.content) for turn in request.conversation_history]
-    gen_result = await generation_service.generate(
-        question=request.question,
-        chunks=retrieval_result.chunks,
-        conversation_history=history or None,
-    )
+    try:
+        gen_result = await generation_service.generate(
+            question=request.question,
+            chunks=retrieval_result.chunks,
+            conversation_history=history or None,
+        )
+    except GenerationServiceError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Request {request_id}: generation backend unavailable.",
+        ) from exc
     try:
         assert_citations_match_allowed_collections(
             gen_result.citations,

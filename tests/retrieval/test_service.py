@@ -6,7 +6,7 @@ from dataclasses import replace
 from plato_rag.domain.chunk import ChunkData, ScoredChunk
 from plato_rag.domain.source import SourceClass
 from plato_rag.retrieval.policy import PLATO_RETRIEVAL_POLICY
-from plato_rag.retrieval.service import RetrievalService
+from plato_rag.retrieval.service import RetrievalService, RetrievalServiceError
 
 
 class _FakeEmbedder:
@@ -15,6 +15,18 @@ class _FakeEmbedder:
 
     def model_name(self) -> str:
         return "fake-embedder"
+
+    def dimensions(self) -> int:
+        return 3
+
+
+class _FailingEmbedder:
+    async def embed(self, texts: list[str]) -> list[list[float]]:
+        del texts
+        raise TimeoutError("embedding timeout")
+
+    def model_name(self) -> str:
+        return "failing-embedder"
 
     def dimensions(self) -> int:
         return 3
@@ -93,3 +105,16 @@ def test_retrieval_continues_to_later_stages_when_reference_quota_unmet(
         [SourceClass.REFERENCE_ENCYCLOPEDIA],
         [SourceClass.PEER_REVIEWED],
     ]
+
+
+def test_retrieval_wraps_embedding_failures(primary_chunk: ChunkData) -> None:
+    del primary_chunk
+    store = _StageAwareVectorStore({})
+    service = RetrievalService(vector_store=store, embedder=_FailingEmbedder())
+
+    try:
+        asyncio.run(service.retrieve("What is justice?", PLATO_RETRIEVAL_POLICY))
+    except RetrievalServiceError as exc:
+        assert "embed retrieval query" in str(exc)
+    else:
+        raise AssertionError("Expected RetrievalServiceError")
