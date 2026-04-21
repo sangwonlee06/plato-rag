@@ -38,12 +38,12 @@ What works:
 - Anthropic generation
 - Structured JSON generation with claim-level citation binding
 - Citation verification with location-aware, metadata-aware matching and claim-level bracket fallback for malformed model output
-- Curated evaluation dataset and CLI runner for retrieval, citation, and grounding checks
+- Curated evaluation datasets and CLI runner for retrieval, citation, and grounding checks, including malformed-output fallback coverage
 - Bounded retries for external embedding, generation, and bootstrap fetch operations
 - Explicit 503 responses when retrieval or generation backends are unavailable
 - Health and source-metadata endpoints
 - public container builds exclude local-only SEP code via `.dockerignore`
-- 104 passing pytest tests
+- 105 passing pytest tests
 
 What is still rough:
 
@@ -271,9 +271,10 @@ python scripts/ingest_primary.py \
 
 ## Evaluation
 
-The repo now includes a curated evaluation set at `data/evaluation/public_seed.yaml`.
-It is meant to catch retrieval, citation, and grounding regressions against the
-current public-safe seed corpus rather than serve as a leaderboard benchmark.
+The repo now includes two curated evaluation datasets:
+
+- `data/evaluation/public_seed.yaml` for normal end-to-end service evaluation
+- `data/evaluation/malformed_output.yaml` for fixture-backed malformed-output cases that exercise bracket fallback through the same `/v1/query` path
 
 Each case specifies:
 
@@ -282,6 +283,10 @@ Each case specifies:
 - required grounded citations
 - answer anchor phrases
 - caps on ungrounded citations and unsupported claims
+
+Malformed-output cases can also define a deterministic generation fixture. Those
+must be run in-process so the evaluation runner can swap in the fixture-backed
+LLM while keeping the normal retrieval and API path intact.
 
 Run it against a live service:
 
@@ -295,6 +300,14 @@ Useful filters:
 python scripts/run_evaluation.py --base-url http://localhost:8001 --tag primary
 python scripts/run_evaluation.py --base-url http://localhost:8001 --case-id meno_recollection_primary
 python scripts/run_evaluation.py --base-url http://localhost:8001 --output eval-report.json
+```
+
+Run the malformed-output fixture set in-process:
+
+```bash
+python scripts/run_evaluation.py \
+  --in-process \
+  --dataset data/evaluation/malformed_output.yaml
 ```
 
 ## Testing and linting

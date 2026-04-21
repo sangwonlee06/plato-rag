@@ -6,6 +6,7 @@ from plato_rag.evaluation.dataset import (
     EvaluationCaseResult,
     EvaluationDataset,
     EvaluationExpectations,
+    GenerationFixture,
     load_dataset,
 )
 from plato_rag.evaluation.runner import evaluate_case_response
@@ -16,6 +17,7 @@ __all__ = [
     "EvaluationCaseResult",
     "EvaluationDataset",
     "EvaluationExpectations",
+    "GenerationFixture",
     "evaluate_case_response",
     "load_dataset",
 ]

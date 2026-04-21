@@ -1,0 +1,52 @@
+version: "1.0"
+name: "public-seed-philosophy-rag-malformed-output"
+description: "Fixture-backed evaluation cases for malformed bracketed generation outputs."
+cases:
+  - id: "meno_recollection_bracket_fallback"
+    question: "In Plato's Meno, what is recollection supposed to explain?"
+    tags: ["primary", "plato", "recollection", "fallback", "malformed_output"]
+    notes: "Exercises primary-text bracket fallback with a Stephanus range."
+    options:
+      max_chunks: 5
+      allowed_collections: ["platonic_dialogues"]
+    generation_fixture:
+      raw_output: >-
+        Recollection explains how inquiry is possible by treating learning as
+        remembering what the soul already knows [Meno 81d-86b].
+    expectations:
+      answer_must_contain: ["recollection", "inquiry"]
+      required_retrieved_works: ["Meno"]
+      required_retrieved_collections: ["platonic_dialogues"]
+      required_citations:
+        - work: "Meno"
+          collection: "platonic_dialogues"
+          location: "81d-86b"
+          source_class: "primary_text"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0
+
+  - id: "epistemology_author_bracket_fallback"
+    question: "In the IEP Epistemology entry, how is knowledge analyzed as justified true belief?"
+    tags: ["reference", "iep", "epistemology", "fallback", "malformed_output"]
+    notes: "Exercises encyclopedia fallback with author plus collection notation."
+    options:
+      max_chunks: 5
+      allowed_collections: ["iep"]
+    generation_fixture:
+      raw_output: >-
+        A standard analysis treats knowledge as justified true belief
+        [David A. Truncellito, IEP §2].
+    expectations:
+      answer_must_contain: ["justified true belief"]
+      required_retrieved_works: ["Epistemology"]
+      required_retrieved_collections: ["iep"]
+      required_citations:
+        - work: "Epistemology"
+          author: "David A. Truncellito"
+          collection: "iep"
+          location: "§2"
+          source_class: "reference_encyclopedia"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0

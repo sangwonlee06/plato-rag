@@ -35,6 +35,19 @@ class CitationExpectation(BaseModel):
         return self
 
 
+class GenerationFixture(BaseModel):
+    """Deterministic generation output used for evaluation fixtures."""
+
+    raw_output: str
+
+    @model_validator(mode="after")
+    def _require_raw_output(self) -> GenerationFixture:
+        if not self.raw_output.strip():
+            msg = "Generation fixture raw_output must be non-empty"
+            raise ValueError(msg)
+        return self
+
+
 class EvaluationExpectations(BaseModel):
     """Checks that a response must satisfy for a case to pass."""
 
@@ -63,6 +76,7 @@ class EvaluationCase(BaseModel):
     options: QueryOptions = Field(default_factory=QueryOptions)
     tags: list[str] = Field(default_factory=list)
     notes: str | None = None
+    generation_fixture: GenerationFixture | None = None
     expectations: EvaluationExpectations
 
 
