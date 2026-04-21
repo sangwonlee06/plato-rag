@@ -205,6 +205,11 @@ python scripts/ingest_corpus.py
 python scripts/ingest_corpus.py --replace-existing
 ```
 
+`--replace-existing` is the reingestion path for seed entries whose stored documents and
+chunks need to be rebuilt after metadata, parsing, or chunking changes. It requires the
+normal database and embedding configuration because it performs a real delete-and-reingest
+cycle, not a metadata-only patch.
+
 The scalable path is manifest-driven:
 
 1. add a new entry to `data/corpus_seed.json`
@@ -226,7 +231,7 @@ python scripts/ingest_corpus.py --only euthydemus nicomachean-ethics
 existing rows for the selected seed entries before reingesting:
 
 ```bash
-python scripts/ingest_corpus.py --replace-existing --only epistemology republic
+python scripts/ingest_corpus.py --replace-existing --only epistemology-iep republic-vii
 python scripts/ingest_corpus.py --replace-existing
 ```
 
@@ -234,6 +239,12 @@ Generation now asks the LLM for a JSON envelope with an `answer` plus explicit `
 and per-claim `citations`. That structured path is the primary claim-to-citation binding
 mechanism. Legacy bracket parsing is retained only as a fallback when the model returns
 malformed output.
+
+When `include_debug=true`, the query response now also exposes:
+
+- `unsupported_claims`: claims the model made without a grounded citation match
+- `citations[].claim_text`: the exact claim a citation is intended to support
+- `citations[].match_score`: the extractor's chunk-level match score for that citation
 
 There is also a one-off primary text ingestion script:
 
