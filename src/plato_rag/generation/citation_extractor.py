@@ -345,7 +345,11 @@ class BasicCitationExtractor:
                 part
                 for part in (
                     chunk.work_title,
+                    chunk.author,
                     chunk.section_title or "",
+                    chunk.speaker or "",
+                    chunk.interlocutor or "",
+                    chunk.context_type or "",
                     chunk.text,
                 )
                 if part
@@ -387,6 +391,8 @@ class BasicCitationExtractor:
         ):
             score -= 8.0
 
+        score += _metadata_phrase_bonus(claim_text, chunk)
+
         return score
 
 
@@ -409,11 +415,20 @@ def _name_match_score(expected: str, actual: str) -> int:
     if normalized_expected == normalized_actual:
         return 90
 
-    expected_tokens = set(normalized_expected.split())
-    actual_tokens = set(normalized_actual.split())
-    if expected_tokens and expected_tokens.issubset(actual_tokens):
+    expected_tokens = normalized_expected.split()
+    actual_tokens = normalized_actual.split()
+    if _compatible_token_sequence(expected_tokens, actual_tokens):
+        return 75
+
+    expected_token_set = set(expected_tokens)
+    actual_token_set = set(actual_tokens)
+    if expected_token_set and expected_token_set.issubset(actual_token_set):
         return 70
-    if actual_tokens and actual_tokens.issubset(expected_tokens):
+
+    if _compatible_token_sequence(actual_tokens, expected_tokens):
+        return 62
+
+    if actual_token_set and actual_token_set.issubset(expected_token_set):
         return 60
     return 0
 
@@ -442,6 +457,54 @@ def _normalize_title(value: str) -> str:
     normalized = re.sub(r"\bbook\s+[ivxlcdm]+\b", "", normalized)
     normalized = re.sub(r"\s+", " ", normalized).strip()
     return normalized
+
+
+def _metadata_phrase_bonus(claim_text: str, chunk: ChunkData) -> float:
+    score = 0.0
+    score += _phrase_match_bonus(claim_text, chunk.author, weight=7.0)
+    score += _phrase_match_bonus(claim_text, chunk.section_title, weight=9.0)
+    score += _phrase_match_bonus(claim_text, chunk.speaker, weight=12.0)
+    score += _phrase_match_bonus(claim_text, chunk.interlocutor, weight=8.0)
+    return score
+
+
+def _phrase_match_bonus(claim_text: str, phrase: str | None, *, weight: float) -> float:
+    if not phrase:
+        return 0.0
+
+    normalized_claim = _normalize_name(claim_text)
+    normalized_phrase = _normalize_name(phrase)
+    if not normalized_claim or not normalized_phrase:
+        return 0.0
+
+    if normalized_phrase in normalized_claim:
+        return weight
+    return 0.0
+
+
+def _compatible_token_sequence(pattern_tokens: list[str], target_tokens: list[str]) -> bool:
+    if not pattern_tokens or not target_tokens:
+        return False
+
+    target_index = 0
+    for pattern_token in pattern_tokens:
+        while target_index < len(target_tokens) and not _tokens_compatible(
+            pattern_token,
+            target_tokens[target_index],
+        ):
+            target_index += 1
+        if target_index == len(target_tokens):
+            return False
+        target_index += 1
+    return True
+
+
+def _tokens_compatible(expected: str, actual: str) -> bool:
+    return (
+        expected == actual
+        or (len(expected) == 1 and actual.startswith(expected))
+        or (len(actual) == 1 and expected.startswith(actual))
+    )
 
 
 def _split_location_range(value: str) -> tuple[str | None, str | None]:

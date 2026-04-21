@@ -55,6 +55,29 @@ def test_extractor_matches_iep_author_and_section_citations() -> None:
     assert citations[0].location == "\u00a72"
 
 
+def test_extractor_matches_iep_author_initials() -> None:
+    extractor = BasicCitationExtractor()
+    chunks = [
+        _chunk(
+            work_title="Epistemology",
+            author="David A. Truncellito",
+            collection="iep",
+            text="Epistemology studies knowledge and justified belief.",
+            location_ref=LocationRef(system=LocationSystem.SECTION, value="2"),
+        )
+    ]
+
+    citations = extractor.extract(
+        "The field centers on knowledge and justification [D. A. Truncellito, IEP §2].",
+        chunks,
+    )
+
+    assert len(citations) == 1
+    assert citations[0].is_grounded is True
+    assert citations[0].work == "Epistemology"
+    assert citations[0].location == "\u00a72"
+
+
 def test_extractor_matches_primary_text_ranges_to_overlapping_chunks() -> None:
     extractor = BasicCitationExtractor()
     chunks = [
@@ -194,6 +217,37 @@ def test_extractor_prefers_claim_aligned_chunk_with_same_section_reference() -> 
         ),
         chunks,
         question="What is knowledge in epistemology?",
+    )
+
+    assert len(citations) == 1
+    assert citations[0].is_grounded is True
+    assert citations[0].matched_chunk_id == chunks[0].id
+
+
+def test_extractor_uses_speaker_metadata_to_break_location_ties() -> None:
+    extractor = BasicCitationExtractor()
+    chunks = [
+        _chunk(
+            work_title="Meno",
+            author="Plato",
+            collection="platonic_dialogues",
+            text="The exchange continues at this point in the dialogue.",
+            location_ref=LocationRef(system=LocationSystem.STEPHANUS, value="82b"),
+        ),
+        _chunk(
+            work_title="Meno",
+            author="Plato",
+            collection="platonic_dialogues",
+            text="The exchange continues at this point in the dialogue.",
+            location_ref=LocationRef(system=LocationSystem.STEPHANUS, value="82b"),
+        ),
+    ]
+    chunks[0].speaker = "Socrates"
+    chunks[1].speaker = "Meno"
+
+    citations = extractor.extract(
+        "Socrates introduces the problem at the start of the exchange [Meno 82b].",
+        chunks,
     )
 
     assert len(citations) == 1

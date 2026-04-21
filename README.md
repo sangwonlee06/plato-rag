@@ -16,7 +16,7 @@ Plato RAG is a separate FastAPI service that handles retrieval and answer ground
 
 It sits beside the chatbot app, not inside it. The NestJS backend sends it a question, the service retrieves relevant chunks, asks the model for an answer, checks the citations it gets back, and returns a structured response.
 
-The project is past the sketch phase. The API, retrieval policy, parsers, ingestion flow, and core domain model are in place. It is still early, though. The corpus is seed-sized, ingestion is manual, and the citation extractor is stricter than it is smart.
+The project is past the sketch phase. The API, retrieval policy, parsers, ingestion flow, and core domain model are in place. It is still early, though. The corpus is seed-sized, ingestion is manual, and the citation extractor is intentionally conservative, with stronger metadata-aware matching than the original MVP.
 
 ## Current status
 
@@ -37,14 +37,14 @@ What works:
 - OpenAI embeddings
 - Anthropic generation
 - Structured JSON generation with claim-level citation binding
-- Citation verification with bracket-parsing fallback for malformed model output
+- Citation verification with location-aware, metadata-aware matching and bracket-parsing fallback for malformed model output
 - Health and source-metadata endpoints
 - public container builds exclude local-only SEP code via `.dockerignore`
-- 84 passing pytest tests
+- 86 passing pytest tests
 
 What is still rough:
 
-- Bracket-parsed citation fallback is still regex-based and limited
+- Bracket-parsed citation fallback is still regex-based and narrower than the structured JSON path
 - No proper evaluation harness yet
 - Error handling and retry behavior need more work
 
@@ -240,6 +240,11 @@ and per-claim `citations`. That structured path is the primary claim-to-citation
 mechanism. Legacy bracket parsing is retained only as a fallback when the model returns
 malformed output.
 
+The citation matcher is still heuristic, but it is no longer just raw title matching. It
+uses normalized work and author matching, structured location overlap via `LocationRef`,
+claim-to-chunk lexical and philosophy-profile alignment, and chunk metadata such as section
+title or dialogue speaker to break otherwise ambiguous matches.
+
 When `include_debug=true`, the query response now also exposes:
 
 - `unsupported_claims`: claims the model made without a grounded citation match
@@ -287,7 +292,7 @@ Short version:
 - ingest more texts
 - expand public IEP coverage beyond the current seed set
 - add more non-Platonic public-domain primary texts with citation-grade location systems
-- improve citation matching
+- further harden citation matching with a real evaluation set and error analysis
 - build a real evaluation set
 - tighten operational behavior around retries and failures
 
