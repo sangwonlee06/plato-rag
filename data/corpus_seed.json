@@ -346,6 +346,138 @@
       "source_url": "https://iep.utm.edu/moralrea/"
     },
     {
+      "id": "philosophy-of-language-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Philosophy of Language",
+      "author": "Michael P. Wolf",
+      "tradition": "cross_tradition",
+      "period": "historical_and_contemporary",
+      "topics": ["philosophy of language", "meaning", "reference", "communication"],
+      "source_url": "https://iep.utm.edu/lang-phi/"
+    },
+    {
+      "id": "meaning-and-communication-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Meaning and Communication",
+      "author": "Emma Borg; Antonio Scarafone; Marat Shardimgaliev",
+      "tradition": "cross_tradition",
+      "period": "contemporary",
+      "topics": ["meaning", "communication", "semantics", "pragmatics"],
+      "source_url": "https://iep.utm.edu/meaning-and-communication/"
+    },
+    {
+      "id": "truth-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Truth",
+      "author": "Bradley Dowden and Norman Swartz",
+      "tradition": "cross_tradition",
+      "period": "historical_and_contemporary",
+      "topics": ["truth", "correspondence", "coherence", "semantic theory"],
+      "source_url": "https://iep.utm.edu/truth/"
+    },
+    {
+      "id": "compositionality-in-language-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Compositionality in Language",
+      "author": "Michael Johnson",
+      "tradition": "cross_tradition",
+      "period": "contemporary",
+      "topics": ["compositionality", "semantics", "language", "meaning"],
+      "source_url": "https://iep.utm.edu/compositionality-in-language/"
+    },
+    {
+      "id": "consciousness-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Consciousness",
+      "author": "Rocco J. Gennaro",
+      "tradition": "cross_tradition",
+      "period": "historical_and_contemporary",
+      "topics": ["consciousness", "qualia", "awareness", "philosophy of mind"],
+      "source_url": "https://iep.utm.edu/consciousness/"
+    },
+    {
+      "id": "intentionality-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Intentionality",
+      "author": "Cathal O’Madagain",
+      "tradition": "cross_tradition",
+      "period": "historical_and_contemporary",
+      "topics": ["intentionality", "aboutness", "mental content", "philosophy of mind"],
+      "source_url": "https://iep.utm.edu/intentio/"
+    },
+    {
+      "id": "mental-causation-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Mental Causation",
+      "author": "Julie Yoo",
+      "tradition": "cross_tradition",
+      "period": "contemporary",
+      "topics": ["mental causation", "mind-body problem", "causation", "physicalism"],
+      "source_url": "https://iep.utm.edu/mental-c/"
+    },
+    {
+      "id": "dualism-and-mind-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Dualism and Mind",
+      "author": "Scott Calef",
+      "tradition": "cross_tradition",
+      "period": "historical_and_contemporary",
+      "topics": ["dualism", "mind", "mind-body problem", "substance dualism"],
+      "source_url": "https://iep.utm.edu/dualism-and-mind/"
+    },
+    {
+      "id": "propositional-attitudes-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Propositional Attitudes",
+      "author": "David Lindeman",
+      "tradition": "cross_tradition",
+      "period": "contemporary",
+      "topics": ["propositional attitudes", "belief", "desire", "mental representation"],
+      "source_url": "https://iep.utm.edu/prop-ati/"
+    },
+    {
+      "id": "logical-consequence-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Logical Consequence",
+      "author": "Matthew McKeon",
+      "tradition": "cross_tradition",
+      "period": "historical_and_contemporary",
+      "topics": ["logical consequence", "inference", "validity", "logic"],
+      "source_url": "https://iep.utm.edu/logcon/"
+    },
+    {
+      "id": "modal-logic-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Modal Logic: A Contemporary View",
+      "author": "Johan van Benthem",
+      "tradition": "analytic",
+      "period": "20th_21st_century",
+      "topics": ["modal logic", "necessity", "possibility", "logic"],
+      "source_url": "https://iep.utm.edu/modal-lo/"
+    },
+    {
+      "id": "propositional-logic-iep",
+      "kind": "iep_url",
+      "collection": "iep",
+      "title": "Propositional Logic",
+      "author": "Kevin C. Klement",
+      "tradition": "analytic",
+      "period": "20th_21st_century",
+      "topics": ["propositional logic", "sentential logic", "logic", "inference"],
+      "source_url": "https://iep.utm.edu/propositional-logic-sentential-logic/"
+    },
+    {
       "id": "rene-descartes-iep",
       "kind": "iep_url",
       "collection": "iep",

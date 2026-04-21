@@ -196,7 +196,8 @@ reference layer remains intentionally cross-tradition through the default IEP
 seed, which now includes stronger medieval, Islamic, Jewish, Chinese, and
 African coverage in addition to the existing ancient, modern, analytic,
 continental, political, and Buddhist entries, plus deeper topical coverage in
-metaphysics, epistemology, and ethics.
+metaphysics, epistemology, ethics, philosophy of language, philosophy of mind,
+and logic.
 
 The sample prepared files cover philosophically key passages but not the full
 text. Full-text ingestion outside the Perseus TEI path still requires manual

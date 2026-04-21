@@ -57,3 +57,21 @@ def test_public_iep_seed_includes_core_topic_entries() -> None:
         "consequentialism-iep",
         "moral-realism-iep",
     }.issubset(iep_entry_ids)
+
+
+def test_public_iep_seed_includes_language_mind_and_logic_entries() -> None:
+    entries = load_manifest(_SEED_MANIFEST_PATH)
+
+    iep_entry_ids = {entry.id for entry in entries if entry.collection == "iep"}
+
+    assert {
+        "philosophy-of-language-iep",
+        "meaning-and-communication-iep",
+        "truth-iep",
+        "consciousness-iep",
+        "intentionality-iep",
+        "mental-causation-iep",
+        "logical-consequence-iep",
+        "modal-logic-iep",
+        "propositional-logic-iep",
+    }.issubset(iep_entry_ids)
