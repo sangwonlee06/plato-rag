@@ -1,8 +1,8 @@
 """POST /v1/query — main query endpoint.
 
-This is an early-stage endpoint. The retrieval quality depends entirely
-on corpus coverage, and the citation extractor is regex-based. See README
-for current implementation status.
+This is an early-stage endpoint. Retrieval quality still depends heavily
+on corpus coverage, and citation verification is conservative by design.
+See README for current implementation status.
 """
 
 from __future__ import annotations

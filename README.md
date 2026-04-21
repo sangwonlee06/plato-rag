@@ -38,7 +38,7 @@ What works:
 - Citation extraction with post-generation verification
 - Health and source-metadata endpoints
 - public container builds exclude local-only SEP code via `.dockerignore`
-- 67 passing pytest tests
+- 75 passing pytest tests
 
 What is still rough:
 

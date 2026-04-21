@@ -18,8 +18,17 @@ Storing these as typed LocationRef rather than opaque strings enables:
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from enum import StrEnum
+
+_RANGE_SEPARATOR_PATTERN = re.compile(r"\s*[\u2013-]\s*")
+_SECTION_PREFIX_PATTERN = re.compile(r"^(?:section|sec\.?)\s+", re.IGNORECASE)
+_PAGE_PREFIX_PATTERN = re.compile(r"^(?:p(?:age)?\.?)\s*", re.IGNORECASE)
+_CHAPTER_PREFIX_PATTERN = re.compile(r"^(?:chapter|chap\.?)\s+", re.IGNORECASE)
+_STEPHANUS_PATTERN = re.compile(r"^(?P<page>\d+)(?P<column>[a-e])$")
+_BEKKER_PATTERN = re.compile(r"^(?P<page>\d+)(?P<column>[ab])(?P<line>\d+)?$")
+_PAGE_PATTERN = re.compile(r"^\d+$")
 
 
 class LocationSystem(StrEnum):
@@ -75,16 +84,195 @@ class LocationRef:
         references like '86b' against structured LocationRefs.
         Handles minor formatting variations.
         """
-        normalized_self = self.value.strip().lower()
-        normalized_other = raw_value.strip().lower()
-        if normalized_self == normalized_other:
-            return True
-        # Handle section prefix variations: "2.1" matches "Section 2.1" matches "§2.1"
-        for prefix in ("section ", "\u00a7", "sec. ", "sec "):
-            stripped_self = normalized_self[len(prefix) :].strip()
-            stripped_other = normalized_other[len(prefix) :].strip()
-            if normalized_self.startswith(prefix) and stripped_self == normalized_other:
+        normalized_self_start = _normalize_location_value(self.system, self.value)
+        normalized_self_end = (
+            _normalize_location_value(self.system, self.range_end)
+            if self.range_end is not None
+            else None
+        )
+        normalized_other = _normalize_raw_reference(self.system, raw_value)
+        if normalized_other is None:
+            return False
+
+        other_start, other_end = normalized_other
+        if other_end is None:
+            if other_start == normalized_self_start:
                 return True
-            if normalized_other.startswith(prefix) and normalized_self == stripped_other:
-                return True
-        return False
+            if normalized_self_end is not None:
+                return _range_contains(
+                    self.system,
+                    normalized_self_start,
+                    normalized_self_end,
+                    other_start,
+                )
+            return False
+
+        return normalized_self_start == other_start and normalized_self_end == other_end
+
+    def overlaps_raw_value(self, raw_value: str) -> bool:
+        """Return True when the raw citation overlaps this location.
+
+        This is stricter than substring matching and supports scholarly
+        range citations like ``82b-85b`` or ``1094a1-1094a20``.
+        """
+        normalized_self_start = _normalize_location_value(self.system, self.value)
+        normalized_self_end = (
+            _normalize_location_value(self.system, self.range_end)
+            if self.range_end is not None
+            else normalized_self_start
+        )
+        normalized_other = _normalize_raw_reference(self.system, raw_value)
+        if normalized_other is None:
+            return False
+
+        other_start, other_end = normalized_other
+        if other_end is None:
+            return _range_contains(
+                self.system,
+                normalized_self_start,
+                normalized_self_end,
+                other_start,
+            )
+
+        return _ranges_overlap(
+            self.system,
+            normalized_self_start,
+            normalized_self_end,
+            other_start,
+            other_end,
+        )
+
+
+def _normalize_raw_reference(
+    system: LocationSystem,
+    raw_value: str,
+) -> tuple[str, str | None] | None:
+    normalized = _normalize_location_value(system, raw_value)
+    if normalized is None:
+        return None
+
+    parts = _RANGE_SEPARATOR_PATTERN.split(normalized, maxsplit=1)
+    start = parts[0]
+    end = parts[1] if len(parts) == 2 else None
+    if end == start:
+        end = None
+    return start, end
+
+
+def _normalize_location_value(system: LocationSystem, raw_value: str | None) -> str | None:
+    if raw_value is None:
+        return None
+
+    normalized = raw_value.strip().lower()
+    normalized = normalized.replace("\u00a0", " ")
+    normalized = normalized.replace("\u2212", "-")
+    normalized = normalized.replace("\u2014", "-")
+    normalized = normalized.replace("\u2013", "-")
+    normalized = re.sub(r"\s+", " ", normalized)
+
+    if system == LocationSystem.SECTION:
+        normalized = normalized.lstrip("\u00a7").strip()
+        normalized = _SECTION_PREFIX_PATTERN.sub("", normalized).strip()
+        return normalized or None
+
+    if system == LocationSystem.PAGE:
+        normalized = _PAGE_PREFIX_PATTERN.sub("", normalized).strip()
+        return normalized or None
+
+    if system == LocationSystem.CHAPTER:
+        normalized = _CHAPTER_PREFIX_PATTERN.sub("", normalized).strip()
+        return normalized or None
+
+    return normalized or None
+
+
+def _range_contains(
+    system: LocationSystem,
+    start: str,
+    end: str,
+    value: str,
+) -> bool:
+    start_key = _ordered_value(system, start)
+    end_key = _ordered_value(system, end)
+    value_key = _ordered_value(system, value)
+    if start_key is None or end_key is None or value_key is None:
+        return value in (start, end)
+    return start_key <= value_key <= end_key
+
+
+def _ranges_overlap(
+    system: LocationSystem,
+    first_start: str,
+    first_end: str,
+    second_start: str,
+    second_end: str,
+) -> bool:
+    first_start_key = _ordered_value(system, first_start)
+    first_end_key = _ordered_value(system, first_end)
+    second_start_key = _ordered_value(system, second_start)
+    second_end_key = _ordered_value(system, second_end)
+    if (
+        first_start_key is None
+        or first_end_key is None
+        or second_start_key is None
+        or second_end_key is None
+    ):
+        return first_start in (second_start, second_end) or first_end in (
+            second_start,
+            second_end,
+        )
+    return first_start_key <= second_end_key and second_start_key <= first_end_key
+
+
+def _ordered_value(system: LocationSystem, raw_value: str) -> tuple[int, ...] | None:
+    if system == LocationSystem.STEPHANUS:
+        match = _STEPHANUS_PATTERN.fullmatch(raw_value)
+        if match is None:
+            return None
+        return (int(match.group("page")), ord(match.group("column")) - ord("a"))
+
+    if system == LocationSystem.BEKKER:
+        match = _BEKKER_PATTERN.fullmatch(raw_value)
+        if match is None:
+            return None
+        line_value = match.group("line")
+        return (
+            int(match.group("page")),
+            ord(match.group("column")) - ord("a"),
+            int(line_value) if line_value is not None else 0,
+        )
+
+    if system == LocationSystem.SECTION:
+        parts = raw_value.split(".")
+        if not parts:
+            return None
+
+        ordered_parts: list[int] = []
+        for part in parts:
+            if part.isdigit():
+                ordered_parts.extend((0, int(part)))
+                continue
+            if part.isalpha():
+                ordered_parts.extend((1, _alpha_value(part)))
+                continue
+            return None
+        return tuple(ordered_parts)
+
+    if system == LocationSystem.PAGE:
+        if _PAGE_PATTERN.fullmatch(raw_value) is None:
+            return None
+        return (int(raw_value),)
+
+    if system == LocationSystem.CHAPTER:
+        if raw_value.isdigit():
+            return (int(raw_value),)
+        return None
+
+    return None
+
+
+def _alpha_value(value: str) -> int:
+    result = 0
+    for character in value:
+        result = result * 26 + (ord(character) - ord("a") + 1)
+    return result
