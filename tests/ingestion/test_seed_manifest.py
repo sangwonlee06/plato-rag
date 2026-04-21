@@ -75,3 +75,20 @@ def test_public_iep_seed_includes_language_mind_and_logic_entries() -> None:
         "modal-logic-iep",
         "propositional-logic-iep",
     }.issubset(iep_entry_ids)
+
+
+def test_public_seed_includes_expanded_primary_text_entries() -> None:
+    entries = load_manifest(_SEED_MANIFEST_PATH)
+
+    entry_ids = {entry.id for entry in entries}
+
+    assert {
+        "crito",
+        "theaetetus",
+        "sophist",
+        "phaedrus",
+        "parmenides",
+        "timaeus",
+        "eudemian-ethics",
+        "poetics",
+    }.issubset(entry_ids)

@@ -123,6 +123,96 @@
       }
     },
     {
+      "id": "crito",
+      "kind": "perseus_tei",
+      "collection": "platonic_dialogues",
+      "title": "Crito",
+      "author": "Plato",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "Harold North Fowler",
+      "topics": ["justice", "law", "obedience", "political obligation"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0170",
+      "source_config": {
+        "text_id": "Crito"
+      }
+    },
+    {
+      "id": "theaetetus",
+      "kind": "perseus_tei",
+      "collection": "platonic_dialogues",
+      "title": "Theaetetus",
+      "author": "Plato",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "Harold N. Fowler",
+      "topics": ["knowledge", "perception", "epistemology", "definition"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0172",
+      "source_config": {
+        "text_id": "Theaet."
+      }
+    },
+    {
+      "id": "sophist",
+      "kind": "perseus_tei",
+      "collection": "platonic_dialogues",
+      "title": "Sophist",
+      "author": "Plato",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "Harold N. Fowler",
+      "topics": ["being", "not-being", "falsehood", "dialectic"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0172",
+      "source_config": {
+        "text_id": "Soph."
+      }
+    },
+    {
+      "id": "phaedrus",
+      "kind": "perseus_tei",
+      "collection": "platonic_dialogues",
+      "title": "Phaedrus",
+      "author": "Plato",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "Harold N. Fowler",
+      "topics": ["rhetoric", "eros", "soul", "writing"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0174",
+      "source_config": {
+        "text_id": "Phaedrus"
+      }
+    },
+    {
+      "id": "parmenides",
+      "kind": "perseus_tei",
+      "collection": "platonic_dialogues",
+      "title": "Parmenides",
+      "author": "Plato",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "Harold N. Fowler",
+      "topics": ["forms", "participation", "unity", "dialectic"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0174",
+      "source_config": {
+        "text_id": "Parm."
+      }
+    },
+    {
+      "id": "timaeus",
+      "kind": "perseus_tei",
+      "collection": "platonic_dialogues",
+      "title": "Timaeus",
+      "author": "Plato",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "W.R.M. Lamb",
+      "topics": ["cosmology", "demiurge", "soul", "nature"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0180",
+      "source_config": {
+        "text_id": "Tim."
+      }
+    },
+    {
       "id": "nicomachean-ethics",
       "kind": "perseus_tei",
       "collection": "aristotle_corpus",
@@ -157,6 +247,30 @@
       "translation": "Hugh Tredennick",
       "topics": ["metaphysics", "substance", "being", "causation"],
       "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0052"
+    },
+    {
+      "id": "eudemian-ethics",
+      "kind": "perseus_tei",
+      "collection": "aristotle_corpus",
+      "title": "Eudemian Ethics",
+      "author": "Aristotle",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "H. Rackham",
+      "topics": ["ethics", "virtue", "happiness", "friendship"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0050"
+    },
+    {
+      "id": "poetics",
+      "kind": "perseus_tei",
+      "collection": "aristotle_corpus",
+      "title": "Poetics",
+      "author": "Aristotle",
+      "tradition": "ancient",
+      "period": "classical_greek",
+      "translation": "W.H. Fyfe",
+      "topics": ["poetics", "tragedy", "mimesis", "catharsis"],
+      "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0056"
     },
     {
       "id": "socrates-iep",

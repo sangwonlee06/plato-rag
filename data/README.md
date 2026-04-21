@@ -199,6 +199,10 @@ continental, political, and Buddhist entries, plus deeper topical coverage in
 metaphysics, epistemology, ethics, philosophy of language, philosophy of mind,
 and logic.
 
+The public-domain primary-text seed now also covers a broader set of central
+Platonic dialogues and additional Aristotelian treatises through the same
+Perseus workflow.
+
 The sample prepared files cover philosophically key passages but not the full
 text. Full-text ingestion outside the Perseus TEI path still requires manual
 preparation (see above).

@@ -30,6 +30,7 @@ What works:
 - public-safe seed corpus bootstrap
 - manifest-driven Perseus TEI ingestion for Plato and Aristotle primary texts
 - public IEP ingestion path with HTML parsing and URL-backed bootstrap
+- expanded public-domain primary-text seed across Plato and Aristotle
 - default public-safe seed corpus spans ancient, medieval, Islamic, Jewish, early modern, analytic, continental, political, Chinese, Buddhist, and African philosophy, with stronger topical IEP coverage in metaphysics, epistemology, ethics, language, mind, and logic
 - local-only SEP ingestion path with deployment guardrails
 - PostgreSQL + pgvector storage
@@ -38,7 +39,7 @@ What works:
 - Citation extraction with post-generation verification
 - Health and source-metadata endpoints
 - public container builds exclude local-only SEP code via `.dockerignore`
-- 76 passing pytest tests
+- 77 passing pytest tests
 
 What is still rough:
 
