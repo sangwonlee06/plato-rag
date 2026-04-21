@@ -47,7 +47,7 @@ What works:
 
 What is still rough:
 
-- Fallback claim reconstruction for malformed model output is still heuristic and less reliable than clean structured JSON responses
+- Malformed outputs that omit usable work, collection, author, or location anchors can still degrade grounding quality
 - The evaluation set is still seed-sized and hand-curated rather than statistically representative
 - Operational behavior is tighter, but failures are still handled with simple bounded retries rather than circuit breakers or queue-backed recovery
 

@@ -35,8 +35,8 @@ cases:
       allowed_collections: ["iep"]
     generation_fixture:
       raw_output: >-
-        A standard analysis treats knowledge as justified true belief
-        [David A. Truncellito, IEP §2].
+        A standard analysis treats knowledge as justified true belief.
+        [David A. Truncellito, IEP §2]
     expectations:
       answer_must_contain: ["justified true belief"]
       required_retrieved_works: ["Epistemology"]

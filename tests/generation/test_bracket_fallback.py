@@ -52,6 +52,21 @@ def test_parse_bracketed_generation_keeps_uncited_claims_when_supported_claims_e
     assert claims[1].citations == []
 
 
+def test_parse_bracketed_generation_attaches_trailing_citation_to_prior_sentence() -> None:
+    answer, claims = parse_bracketed_generation(
+        "Knowledge is often analyzed as justified true belief. "
+        "[David A. Truncellito, IEP §2]"
+    )
+
+    assert answer == "Knowledge is often analyzed as justified true belief."
+    assert len(claims) == 1
+    assert claims[0].claim == "Knowledge is often analyzed as justified true belief."
+    assert len(claims[0].citations) == 1
+    assert claims[0].citations[0].author == "David A. Truncellito"
+    assert claims[0].citations[0].collection == "iep"
+    assert claims[0].citations[0].location == "\u00a72"
+
+
 def test_parse_bracketed_generation_returns_no_claims_without_brackets() -> None:
     answer, claims = parse_bracketed_generation("This is not JSON.")
 

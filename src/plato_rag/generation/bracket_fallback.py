@@ -27,8 +27,10 @@ _LOCATION_START_PATTERN = re.compile(
     r"^(?:\u00a7|section\s+|sec\.?\s+|p(?:age)?\.?\s+|chapter\s+|chap\.?\s+|\d)",
     re.IGNORECASE,
 )
-_MULTISPACE_PATTERN = re.compile(r"[ \t]+")
+_MULTISPACE_PATTERN = re.compile(r"\s+")
 _SPACE_BEFORE_PUNCTUATION_PATTERN = re.compile(r"\s+([,.;:?!])")
+_SENTENCE_ENDING_PUNCTUATION = {".", "?", "!"}
+_BOUNDARY_CONTINUATION_CHARACTERS = frozenset("\"')]}»”’")
 
 
 @dataclass(frozen=True)
@@ -108,6 +110,7 @@ def _collect_claim_candidates(segments: list[_Segment]) -> list[_ClaimCandidate]
     candidates: list[_ClaimCandidate] = []
     text_buffer: list[str] = []
     citations: list[StructuredCitation] = []
+    pending_sentence_boundary = False
 
     for segment in segments:
         if segment.kind == "citation":
@@ -115,9 +118,21 @@ def _collect_claim_candidates(segments: list[_Segment]) -> list[_ClaimCandidate]
             continue
 
         for character in segment.text:
-            text_buffer.append(character)
-            if character in ".?!\n":
+            normalized_character = " " if character in {"\n", "\r", "\t"} else character
+
+            if pending_sentence_boundary:
+                if normalized_character.isspace():
+                    text_buffer.append(normalized_character)
+                    continue
+                if normalized_character in _BOUNDARY_CONTINUATION_CHARACTERS:
+                    text_buffer.append(normalized_character)
+                    continue
                 _flush_candidate(candidates, text_buffer, citations)
+                pending_sentence_boundary = False
+
+            text_buffer.append(normalized_character)
+            if normalized_character in _SENTENCE_ENDING_PUNCTUATION:
+                pending_sentence_boundary = True
 
     _flush_candidate(candidates, text_buffer, citations)
 
