@@ -3,7 +3,9 @@
 Multiplies chunk similarity scores by a trust-tier factor from the
 RetrievalPolicy. Primary texts get 1.3x, reference encyclopedias get
 1.15x, peer-reviewed stays at 1.0x, bibliographies get 0.9x. This is
-a simple heuristic, not a learned model.
+a simple heuristic, not a learned model. Query-sensitive collection
+boosts can further promote IEP on orientation/survey questions without
+changing the default primary > reference ordering.
 """
 
 from __future__ import annotations
@@ -29,6 +31,7 @@ class SourcePriorityReranker:
     ) -> list[ScoredChunk]:
         query_profile = profile_text(query)
         query_tokens = significant_tokens(query)
+        query_mode = _classify_query_mode(query, query_tokens=query_tokens, query_profile=query_profile)
         reranked = []
         for sc in chunks:
             tier = trust_tier_for(sc.chunk.source_class)
@@ -37,6 +40,7 @@ class SourcePriorityReranker:
                 query_tokens=query_tokens,
                 query_profile=query_profile,
             )
+            boost *= policy.boost_for_collection_query(sc.chunk.collection, query_mode)
             reranked.append(
                 ScoredChunk(
                     chunk=sc.chunk,
@@ -131,3 +135,80 @@ def _is_general_philosophy_query(query_tokens: set[str]) -> bool:
             "knowledge",
         }
     )
+
+
+_ORIENTATION_PREFIXES = (
+    "what is ",
+    "what are ",
+    "who is ",
+    "who are ",
+    "define ",
+    "give an overview of ",
+    "provide an overview of ",
+    "introduce ",
+    "summarize ",
+    "compare ",
+)
+
+_ORIENTATION_MARKERS = {
+    "overview",
+    "introduction",
+    "intro",
+    "summary",
+    "survey",
+    "background",
+    "compare",
+    "comparison",
+    "difference",
+    "differences",
+    "define",
+    "definition",
+    "general",
+}
+
+_EXEGETICAL_PHRASES = (
+    "according to",
+    "what does",
+    "how does",
+    "why does",
+    "where does",
+    "mean by",
+    "argue in",
+    "claim in",
+    "say in",
+    "describe in",
+    "in the meno",
+    "in the republic",
+    "in the apology",
+    "in the phaedo",
+    "in the symposium",
+    "in the meditations",
+    "in the enquiry",
+    "in book ",
+    "in chapter ",
+    "in section ",
+    "this passage",
+)
+
+
+def _classify_query_mode(
+    query: str,
+    *,
+    query_tokens: set[str],
+    query_profile: PhilosophyProfile,
+) -> str:
+    normalized_query = " ".join(query.casefold().split())
+
+    if any(phrase in normalized_query for phrase in _EXEGETICAL_PHRASES):
+        return "default"
+
+    if any(normalized_query.startswith(prefix) for prefix in _ORIENTATION_PREFIXES):
+        return "orientation"
+
+    if query_tokens & _ORIENTATION_MARKERS:
+        return "orientation"
+
+    if _is_general_philosophy_query(query_tokens) and not query_profile.philosophers:
+        return "orientation"
+
+    return "default"

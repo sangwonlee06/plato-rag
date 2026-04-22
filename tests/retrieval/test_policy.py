@@ -36,6 +36,13 @@ class TestPlatoPolicy:
     def test_unknown_tier_returns_neutral(self) -> None:
         assert PLATO_RETRIEVAL_POLICY.boost_for_tier(99) == 1.0
 
+    def test_iep_orientation_boost_is_below_primary_default_priority(self) -> None:
+        policy = PLATO_RETRIEVAL_POLICY
+        assert policy.boost_for_collection_query("iep", "orientation") > 1.0
+        assert policy.boost_for_tier(1) > (
+            policy.boost_for_tier(2) * policy.boost_for_collection_query("iep", "orientation")
+        )
+
     def test_three_search_stages(self) -> None:
         stages = PLATO_RETRIEVAL_POLICY.search_stages
         assert len(stages) == 3
@@ -79,6 +86,97 @@ class TestSourcePriorityReranker:
         result = reranker.rerank(chunks, "test", PLATO_RETRIEVAL_POLICY)
         assert result[0].boosted_score is not None
         assert abs(result[0].boosted_score - 0.80 * 1.30) < 0.001
+
+    def test_orientation_query_boosts_iep_but_does_not_equalize_it_with_primary(
+        self,
+        primary_chunk: ChunkData,
+        sep_chunk: ChunkData,
+    ) -> None:
+        reranker = SourcePriorityReranker()
+        iep_chunk = replace(
+            sep_chunk,
+            collection="iep",
+            work_title="Epistemology",
+            author="David A. Truncellito",
+            text="Epistemology studies knowledge, justification, and belief.",
+            extra_metadata={
+                "tradition": "cross_tradition",
+                "period": "historical_and_contemporary",
+                "topics": ["epistemology", "knowledge"],
+            },
+        )
+        primary = replace(
+            primary_chunk,
+            text="Socrates speaks about recollection and virtue.",
+            extra_metadata={
+                "tradition": "ancient",
+                "period": "classical_greek",
+                "topics": ["epistemology", "ethics"],
+            },
+        )
+        chunks = [
+            ScoredChunk(chunk=iep_chunk, similarity_score=0.85),
+            ScoredChunk(chunk=primary, similarity_score=0.85),
+        ]
+
+        result = reranker.rerank(
+            chunks,
+            "What is epistemology?",
+            PLATO_RETRIEVAL_POLICY,
+        )
+
+        iep_result = next(sc for sc in result if sc.chunk.collection == "iep")
+        assert iep_result.boosted_score is not None
+        assert iep_result.boosted_score > 0.85 * 1.15
+        assert result[0].chunk.collection == "iep"
+
+    def test_exegetical_query_does_not_get_orientation_iep_boost(
+        self,
+        primary_chunk: ChunkData,
+        sep_chunk: ChunkData,
+    ) -> None:
+        reranker = SourcePriorityReranker()
+        iep_chunk = replace(
+            sep_chunk,
+            collection="iep",
+            work_title="Epistemology",
+            author="David A. Truncellito",
+            text="Epistemology studies knowledge, justification, and belief.",
+            extra_metadata={
+                "tradition": "cross_tradition",
+                "period": "historical_and_contemporary",
+                "topics": ["epistemology", "knowledge"],
+            },
+        )
+        plato_chunk = replace(
+            primary_chunk,
+            extra_metadata={
+                "tradition": "ancient",
+                "period": "classical_greek",
+                "topics": ["epistemology", "ethics"],
+            },
+        )
+        chunks = [
+            ScoredChunk(chunk=iep_chunk, similarity_score=0.85),
+            ScoredChunk(chunk=plato_chunk, similarity_score=0.85),
+        ]
+
+        orientation_result = reranker.rerank(
+            chunks,
+            "What is epistemology?",
+            PLATO_RETRIEVAL_POLICY,
+        )
+        exegetical_result = reranker.rerank(
+            chunks,
+            "What does Plato mean by recollection in the Meno?",
+            PLATO_RETRIEVAL_POLICY,
+        )
+
+        orientation_iep = next(sc for sc in orientation_result if sc.chunk.collection == "iep")
+        exegetical_iep = next(sc for sc in exegetical_result if sc.chunk.collection == "iep")
+        assert orientation_iep.boosted_score is not None
+        assert exegetical_iep.boosted_score is not None
+        assert orientation_iep.boosted_score > exegetical_iep.boosted_score
 
     def test_topic_aligned_reference_can_beat_ancient_primary_for_general_query(
         self,

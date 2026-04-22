@@ -7,6 +7,7 @@ inspectable, testable, and serializable.
 The current implementation is straightforward:
 - search_stages: search source classes in priority order
 - tier_boosts: multiply scores by a constant per trust tier
+- collection_query_boosts: limited collection-specific boosts for query intent
 - source_quotas: guarantee minimum representation (best-effort)
 - grounding rules: simple threshold checks for interpretation level
 """
@@ -52,6 +53,15 @@ class SearchStage:
 
 
 @dataclass(frozen=True)
+class CollectionQueryBoost:
+    """Optional collection-specific boost for a recognized query mode."""
+
+    collection: str
+    query_mode: str
+    boost_factor: float
+
+
+@dataclass(frozen=True)
 class GroundingRule:
     """Thresholds for interpretation level assessment."""
 
@@ -70,6 +80,7 @@ class RetrievalPolicy:
     similarity_threshold: float = 0.30
     source_quotas: tuple[SourceQuota, ...] = ()
     tier_boosts: tuple[TierBoost, ...] = ()
+    collection_query_boosts: tuple[CollectionQueryBoost, ...] = ()
     search_stages: tuple[SearchStage, ...] = ()
     grounding: GroundingRule = field(default_factory=GroundingRule)
 
@@ -85,6 +96,12 @@ class RetrievalPolicy:
                 return sq
         return None
 
+    def boost_for_collection_query(self, collection: str, query_mode: str) -> float:
+        for boost in self.collection_query_boosts:
+            if boost.collection == collection and boost.query_mode == query_mode:
+                return boost.boost_factor
+        return 1.0
+
 
 PLATO_RETRIEVAL_POLICY = RetrievalPolicy(
     max_chunks=5,
@@ -98,6 +115,9 @@ PLATO_RETRIEVAL_POLICY = RetrievalPolicy(
         TierBoost(trust_tier=2, boost_factor=1.15),
         TierBoost(trust_tier=3, boost_factor=1.00),
         TierBoost(trust_tier=4, boost_factor=0.90),
+    ),
+    collection_query_boosts=(
+        CollectionQueryBoost(collection="iep", query_mode="orientation", boost_factor=1.10),
     ),
     search_stages=(
         SearchStage(source_classes=(SourceClass.PRIMARY_TEXT,), max_candidates=10),
