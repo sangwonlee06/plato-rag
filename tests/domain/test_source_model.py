@@ -54,9 +54,17 @@ class TestCollectionRegistry:
         assert collection_source_class("platonic_dialogues") == SourceClass.PRIMARY_TEXT
         assert collection_exposure("platonic_dialogues") == SourceExposure.PUBLIC
 
+    def test_modern_primary_collections_are_public(self) -> None:
+        assert collection_source_class("cartesian_meditations") == SourceClass.PRIMARY_TEXT
+        assert collection_exposure("cartesian_meditations") == SourceExposure.PUBLIC
+        assert collection_source_class("hume_enquiry") == SourceClass.PRIMARY_TEXT
+        assert collection_exposure("hume_enquiry") == SourceExposure.PUBLIC
+
     def test_public_collection_names_excludes_sep(self) -> None:
         assert "sep" not in public_collection_names()
         assert "platonic_dialogues" in public_collection_names()
+        assert "cartesian_meditations" in public_collection_names()
+        assert "hume_enquiry" in public_collection_names()
 
     def test_local_only_collection_names_contains_sep(self) -> None:
         assert local_only_collection_names() == {"sep"}

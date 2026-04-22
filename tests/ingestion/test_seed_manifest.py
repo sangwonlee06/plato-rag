@@ -91,4 +91,6 @@ def test_public_seed_includes_expanded_primary_text_entries() -> None:
         "timaeus",
         "eudemian-ethics",
         "poetics",
+        "descartes-meditations",
+        "hume-enquiry",
     }.issubset(entry_ids)

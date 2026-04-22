@@ -56,6 +56,22 @@ collections:
       Bekker numbering preserved. Supports prepared text format with
       [SECTION] markers and Perseus TEI bootstrap for single-work treatises.
 
+  cartesian_meditations:
+    source_class: primary_text
+    parser: plaintext
+    chunker: section
+    status: mvp
+    notes: >
+      Stable page citations from a public-domain edition must be preserved.
+
+  hume_enquiry:
+    source_class: primary_text
+    parser: plaintext
+    chunker: section
+    status: mvp
+    notes: >
+      Section and paragraph numbering must be preserved.
+
   sep:
     source_class: reference_encyclopedia
     parser: html

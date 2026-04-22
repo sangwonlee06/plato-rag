@@ -273,6 +273,33 @@
       "source_url": "https://www.perseus.tufts.edu/hopper/dltext?doc=Perseus:text:1999.01.0056"
     },
     {
+      "id": "descartes-meditations",
+      "kind": "prepared_text",
+      "collection": "cartesian_meditations",
+      "title": "Meditations on First Philosophy",
+      "author": "René Descartes",
+      "tradition": "modern",
+      "period": "early_modern",
+      "translation": "Elizabeth S. Haldane and G.R.T. Ross",
+      "edition": "The Philosophical Works of Descartes, vol. 1 (1911)",
+      "topics": ["skepticism", "cogito", "god", "mind-body dualism"],
+      "source_url": "https://en.wikisource.org/wiki/The_Philosophical_Works_of_Decartes/Volume_1/Meditations_on_First_Philosophy",
+      "input_path": "prepared/primary/descartes_meditations.txt"
+    },
+    {
+      "id": "hume-enquiry",
+      "kind": "prepared_text",
+      "collection": "hume_enquiry",
+      "title": "An Enquiry concerning Human Understanding",
+      "author": "David Hume",
+      "tradition": "modern",
+      "period": "early_modern",
+      "edition": "1748 and 1777 editions as presented by Hume Texts Online",
+      "topics": ["causation", "induction", "experience", "skepticism"],
+      "source_url": "https://davidhume.org/texts/e/full",
+      "input_path": "prepared/primary/hume_enquiry.txt"
+    },
+    {
       "id": "socrates-iep",
       "kind": "iep_url",
       "collection": "iep",

@@ -22,7 +22,13 @@ def _chunk(
         text=text,
         source_class=(
             SourceClass.PRIMARY_TEXT
-            if collection in {"platonic_dialogues", "aristotle_corpus"}
+            if collection
+            in {
+                "platonic_dialogues",
+                "aristotle_corpus",
+                "cartesian_meditations",
+                "hume_enquiry",
+            }
             else SourceClass.REFERENCE_ENCYCLOPEDIA
         ),
         collection=collection,
@@ -132,6 +138,52 @@ def test_extractor_matches_bekker_range_citations() -> None:
     assert len(citations) == 1
     assert citations[0].is_grounded is True
     assert citations[0].location == "1094a1-1094a20"
+
+
+def test_extractor_matches_page_citations_for_descartes() -> None:
+    extractor = BasicCitationExtractor()
+    chunks = [
+        _chunk(
+            work_title="Meditations on First Philosophy",
+            author="René Descartes",
+            collection="cartesian_meditations",
+            text="I am, I exist, is necessarily true each time I pronounce it or conceive it.",
+            location_ref=LocationRef(system=LocationSystem.PAGE, value="151"),
+        )
+    ]
+
+    citations = extractor.extract(
+        "Descartes secures the cogito by treating existence as indubitable in thought "
+        "[Meditations on First Philosophy p. 151].",
+        chunks,
+    )
+
+    assert len(citations) == 1
+    assert citations[0].is_grounded is True
+    assert citations[0].location == "p. 151"
+
+
+def test_extractor_matches_hume_section_citations() -> None:
+    extractor = BasicCitationExtractor()
+    chunks = [
+        _chunk(
+            work_title="An Enquiry concerning Human Understanding",
+            author="David Hume",
+            collection="hume_enquiry",
+            text="All reasonings concerning matter of fact seem to be founded on cause and effect.",
+            location_ref=LocationRef(system=LocationSystem.SECTION, value="4.4"),
+        )
+    ]
+
+    citations = extractor.extract(
+        "Hume locates empirical inference in causal reasoning "
+        "[An Enquiry concerning Human Understanding 4.4].",
+        chunks,
+    )
+
+    assert len(citations) == 1
+    assert citations[0].is_grounded is True
+    assert citations[0].location == "4.4"
 
 
 def test_extractor_splits_multiple_citations_in_one_bracket() -> None:

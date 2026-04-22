@@ -31,3 +31,12 @@ def test_bekker_ranges_contain_single_line_citations() -> None:
     assert location.overlaps_raw_value("1094a5")
     assert location.overlaps_raw_value("1094a1-1094a20")
     assert not location.overlaps_raw_value("1094b1")
+
+
+def test_page_locations_match_prefixed_citations_and_ranges() -> None:
+    location = LocationRef(system=LocationSystem.PAGE, value="149", range_end="150")
+
+    assert location.matches_value("149")
+    assert location.matches_value("p. 149")
+    assert location.overlaps_raw_value("149-150")
+    assert not location.overlaps_raw_value("151")

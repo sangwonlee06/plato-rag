@@ -52,6 +52,8 @@ The next section begins here.
 | `platonic_dialogues` | Stephanus | `86b`, `514a-520a` |
 | `aristotle_corpus` | Bekker | `1094a1` |
 | `presocratic_fragments` | DK | `22B30` |
+| `cartesian_meditations` | Page | `144`, `149-150` |
+| `hume_enquiry` | Section/paragraph | `4.1`, `12.34` |
 | `sep` | Section | `2.1`, `§3` |
 | `iep` | Section | `1`, `1.a`, `§1.a` |
 
@@ -109,6 +111,12 @@ The parser currently supports two citation-preserving Perseus modes:
 
 - Platonic dialogues: Stephanus milestones plus speaker changes
 - Aristotle treatises: Bekker page/line milestones plus book/chapter structure
+
+Prepared public-domain modern texts can also preserve citation-grade locations
+through curated plaintext:
+
+- Descartes: edition page numbers from a stable public-domain translation
+- Hume: canonical section.paragraph references such as `4.1` or `12.34`
 
 Example Aristotle entry:
 
@@ -208,6 +216,8 @@ PLATO_RAG_EMBEDDING_DIMENSIONS=3072
 | Phaedo | platonic_dialogues | planned | — | — |
 | Perseus Plato texts | platonic_dialogues | supported | public-domain Perseus translations | varies by work |
 | Perseus Aristotle texts | aristotle_corpus | supported | public-domain Perseus translations | varies by work |
+| Descartes, *Meditations* | cartesian_meditations | committed | Haldane/Ross (public domain) | 53 |
+| Hume, *Enquiry concerning Human Understanding* | hume_enquiry | committed | authorial English text | 255 |
 | IEP broad philosophy entries | iep | supported | live HTML bootstrap | varies by entry |
 | SEP entries | sep | local-only | — | — |
 

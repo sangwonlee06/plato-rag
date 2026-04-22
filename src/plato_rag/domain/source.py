@@ -127,7 +127,25 @@ COLLECTION_REGISTRY: dict[str, SourceCollectionInfo] = {
         notes="Bekker numbering must be preserved. Supports prepared plaintext "
         "and Perseus TEI ingestion.",
     ),
-    # Future: descartes_meditations, hume_treatise, kant_critique, mill_liberty, etc.
+    "cartesian_meditations": SourceCollectionInfo(
+        name="cartesian_meditations",
+        source_class=SourceClass.PRIMARY_TEXT,
+        exposure=SourceExposure.PUBLIC,
+        label="Cartesian Meditations",
+        parser_type="plaintext",
+        chunker_type="section",
+        notes="Stable page citations from a public-domain edition must be preserved.",
+    ),
+    "hume_enquiry": SourceCollectionInfo(
+        name="hume_enquiry",
+        source_class=SourceClass.PRIMARY_TEXT,
+        exposure=SourceExposure.PUBLIC,
+        label="Hume Enquiry",
+        parser_type="plaintext",
+        chunker_type="section",
+        notes="Section and paragraph numbering must be preserved.",
+    ),
+    # Future: kant_critique, mill_liberty, spinoza_ethics, etc.
     "sep": SourceCollectionInfo(
         name="sep",
         source_class=SourceClass.REFERENCE_ENCYCLOPEDIA,

@@ -37,6 +37,8 @@ COLLECTION_LOCATION_SYSTEMS: dict[str, LocationSystem] = {
     "platonic_dialogues": LocationSystem.STEPHANUS,
     "aristotle_corpus": LocationSystem.BEKKER,
     "presocratic_fragments": LocationSystem.DK,
+    "cartesian_meditations": LocationSystem.PAGE,
+    "hume_enquiry": LocationSystem.SECTION,
 }
 
 
