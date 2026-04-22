@@ -271,9 +271,10 @@ python scripts/ingest_primary.py \
 
 ## Evaluation
 
-The repo now includes two curated evaluation datasets:
+The repo now includes three curated evaluation datasets:
 
 - `data/evaluation/public_seed.yaml` for normal end-to-end service evaluation
+- `data/evaluation/query_intent_routing.yaml` for mixed primary-plus-IEP retrieval regression cases
 - `data/evaluation/malformed_output.yaml` for fixture-backed malformed-output cases that exercise bracket fallback through the same `/v1/query` path
 
 Each case specifies:
@@ -300,6 +301,9 @@ Useful filters:
 python scripts/run_evaluation.py --base-url http://localhost:8001 --tag primary
 python scripts/run_evaluation.py --base-url http://localhost:8001 --case-id meno_recollection_primary
 python scripts/run_evaluation.py --base-url http://localhost:8001 --output eval-report.json
+python scripts/run_evaluation.py \
+  --base-url http://localhost:8001 \
+  --dataset data/evaluation/query_intent_routing.yaml
 ```
 
 Run the malformed-output fixture set in-process:

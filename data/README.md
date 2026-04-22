@@ -69,11 +69,17 @@ questions against the seeded public corpus.
 The current committed file is:
 
 - `data/evaluation/public_seed.yaml`
+- `data/evaluation/query_intent_routing.yaml`
 
 Run it with:
 
 ```bash
 python scripts/run_evaluation.py --base-url http://localhost:8001
+
+# Mixed primary-vs-IEP routing regression set
+python scripts/run_evaluation.py \
+  --base-url http://localhost:8001 \
+  --dataset data/evaluation/query_intent_routing.yaml
 ```
 
 ---

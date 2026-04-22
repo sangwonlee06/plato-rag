@@ -1,0 +1,96 @@
+version: "1.0"
+name: "query-intent-routing"
+description: >
+  Curated regression set for mixed primary-plus-IEP retrieval. These cases
+  check that broad orientation questions route toward IEP while work-specific
+  exegetical questions remain grounded in primary texts even when IEP is
+  available.
+cases:
+  - id: "epistemology_orientation_routes_to_iep"
+    question: "What is epistemology?"
+    tags: ["routing", "orientation", "iep", "epistemology"]
+    notes: >
+      Broad orientation query with both primary texts and IEP available.
+      IEP should be retrieved and cited.
+    options:
+      max_chunks: 5
+      allowed_collections:
+        ["platonic_dialogues", "aristotle_corpus", "cartesian_meditations", "hume_enquiry", "iep"]
+    expectations:
+      answer_must_contain: ["knowledge"]
+      required_retrieved_works_any_of: ["Epistemology", "Knowledge"]
+      required_retrieved_collections: ["iep"]
+      required_citations_any_of:
+        - work: "Epistemology"
+          collection: "iep"
+          source_class: "reference_encyclopedia"
+        - work: "Knowledge"
+          collection: "iep"
+          source_class: "reference_encyclopedia"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0
+
+  - id: "consciousness_orientation_routes_to_iep"
+    question: "What is consciousness in philosophy of mind?"
+    tags: ["routing", "orientation", "iep", "philosophy_of_mind"]
+    notes: >
+      Another broad orientation query that should favor the topical IEP entry
+      over unrelated primary material.
+    options:
+      max_chunks: 5
+      allowed_collections:
+        ["platonic_dialogues", "aristotle_corpus", "cartesian_meditations", "hume_enquiry", "iep"]
+    expectations:
+      answer_must_contain: ["consciousness"]
+      required_retrieved_works: ["Consciousness"]
+      required_retrieved_collections: ["iep"]
+      required_citations:
+        - work: "Consciousness"
+          collection: "iep"
+          source_class: "reference_encyclopedia"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0
+
+  - id: "meno_exegetical_stays_primary_with_iep_available"
+    question: "What does Plato mean by recollection in the Meno?"
+    tags: ["routing", "exegetical", "primary", "plato", "epistemology"]
+    notes: >
+      Work-specific exegetical query. IEP is allowed, but the answer should be
+      grounded in the primary dialogue.
+    options:
+      max_chunks: 5
+      allowed_collections: ["platonic_dialogues", "iep"]
+    expectations:
+      answer_must_contain: ["recollection"]
+      required_retrieved_works: ["Meno"]
+      required_retrieved_collections: ["platonic_dialogues"]
+      required_citations:
+        - work: "Meno"
+          collection: "platonic_dialogues"
+          source_class: "primary_text"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0
+
+  - id: "descartes_exegetical_stays_primary_with_iep_available"
+    question: "How does Descartes reach the cogito in the Meditations?"
+    tags: ["routing", "exegetical", "primary", "descartes", "modern"]
+    notes: >
+      Work-specific modern-primary query. IEP is available, but the answer
+      should cite the Meditations rather than defaulting to encyclopedia prose.
+    options:
+      max_chunks: 5
+      allowed_collections: ["cartesian_meditations", "iep"]
+    expectations:
+      answer_must_contain: ["exist", "think"]
+      required_retrieved_works: ["Meditations on First Philosophy"]
+      required_retrieved_collections: ["cartesian_meditations"]
+      required_citations:
+        - work: "Meditations on First Philosophy"
+          collection: "cartesian_meditations"
+          source_class: "primary_text"
+      min_citations: 1
+      max_ungrounded_citations: 0
+      max_unsupported_claims: 0

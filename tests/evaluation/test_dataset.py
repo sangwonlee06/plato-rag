@@ -28,3 +28,25 @@ def test_malformed_output_dataset_loads_with_generation_fixtures() -> None:
     assert len(dataset.cases) >= 2
     assert all(case.generation_fixture is not None for case in dataset.cases)
     assert any("malformed_output" in case.tags for case in dataset.cases)
+
+
+def test_query_intent_routing_dataset_loads_and_covers_both_query_modes() -> None:
+    dataset = load_dataset(Path("data/evaluation/query_intent_routing.yaml"))
+
+    assert dataset.name == "query-intent-routing"
+    assert len(dataset.cases) >= 4
+    assert all("routing" in case.tags for case in dataset.cases)
+    assert any("orientation" in case.tags for case in dataset.cases)
+    assert any("exegetical" in case.tags for case in dataset.cases)
+    assert any(
+        case.options.allowed_collections
+        and "iep" in case.options.allowed_collections
+        and "platonic_dialogues" in case.options.allowed_collections
+        for case in dataset.cases
+    )
+    assert any(
+        case.options.allowed_collections
+        and "iep" in case.options.allowed_collections
+        and "cartesian_meditations" in case.options.allowed_collections
+        for case in dataset.cases
+    )
